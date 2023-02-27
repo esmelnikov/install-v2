@@ -426,8 +426,6 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	####### For debug #######
 	echo "${var_filial}"
 
-	pause
-
 	base64 -d "$var_installdir/setting.enc" >"$var_installdir/setting.orig"
 	var_filialcode=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f2)
 	var_domain=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f3)
@@ -460,6 +458,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		$var_fadmingrp:localadmins
 		$var_gadmingrp:localadmins
 	EOF
+	# Можно сохранять сразу в настройки репозиториев
 	cat >"$var_installdir/local.list" <<-EOF
 		rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64 classic
 		rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64-i586 classic
@@ -477,10 +476,10 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	fi
 
 	####### Enter hostname #######
-	#var_cod=$(cat "$var_installdir/filialcode")
+	var_cod=$(cat "$var_installdir/filialcode")
 	var_title="Имя компьютера"
 	var_text="Введите имя компьютера"
-	var_exitcode="200"
+	var_exitcode=200
 	if [[ "$(cat "$var_os")" = "workstation" ]]; then
 		var_prefix=WS
 		var_symbol=4
@@ -530,6 +529,8 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	echo "${var_exitcode}"
 	echo "${var_hostname}"
 	####### Enter hostname #######
+
+	pause
 
 	var_cod=$(cat "$var_installdir/filialcode")
 	var_return="200"

@@ -180,8 +180,9 @@ function requestcred() {
 		clear
 		var_username=$(echo -n "$var_credential" | cut -d"|" -f1)
 		var_password=${var_credential#*|}
-		#echo "$var_username"
-		#echo "$var_password"
+		####### For debug #######
+		echo "$var_username"
+		echo "$var_password"
 		if [ "$var_username" = "" ] || [ "$var_password" = "" ] || [ "$var_credential" = "" ]; then
 			message "--warning" "Имя пользователя и пароль должны быть указаны"
 			var_exitcode=200
@@ -266,10 +267,10 @@ fi
 # ШАГ 0 НАЧАЛО
 if [[ "$(cat "$var_stage")" = 0 ]]; then
 	echo "ШАГ $(cat "$var_stage") начало..."
-	echo "Скрипт расположен в каталоге: $var_scriptdir"
-	echo "Скрипт запущен пользователем: $(logname)"
-	echo "Скрипт выполняется с правами пользователя: $(whoami)"
-	echo "Переменная окружения \$HOME: $HOME"
+	#echo "Скрипт расположен в каталоге: $var_scriptdir"
+	#echo "Скрипт запущен пользователем: $(logname)"
+	#echo "Скрипт выполняется с правами пользователя: $(whoami)"
+	#echo "Переменная окружения \$HOME: $HOME"
 
 	if [[ "$(cat "$var_os")" = "workstation" ]]; then
 		# Пакеты для установки из репозитория на ОС Alt Workstation

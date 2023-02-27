@@ -6,12 +6,12 @@
 
 # var_scriptrepo="http://mirror.ttg.gazprom.ru/distribs"
 var_scriptrepo="https://raw.githubusercontent.com/esmelnikov/install-v2/main"
-var_version="02.24.02.23"
+var_version="02.27.02.15"
 var_scriptname="install-v2.sh"
 set -o pipefail # trace ERR through pipes
 set -o errtrace # trace ERR through 'time command' and other functions
-#set -o nounset   ## set -u : exit the script if you try to use an uninitialised variable
-set -o errexit ## set -e : exit the script if any statement returns a non-true return value
+set -o nounset # set -u : exit the script if you try to use an uninitialised variable
+set -o errexit # set -e : exit the script if any statement returns a non-true return value
 #set -x
 
 if test "$(id -u)" -ne 0; then

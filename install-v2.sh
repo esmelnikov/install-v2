@@ -127,6 +127,8 @@ function escape {
 }
 
 function message {
+	local var_exitcode
+	local var_title
 	set +e
 	trap '' ERR
 	[[ "$1" == "--warning" ]] && var_title="Предупреждение[!]"
@@ -147,7 +149,6 @@ function message {
 	fi
 	set -e
 	trap 'error ${LINENO}' ERR
-	var_title=""
 }
 
 function requestcred() {
@@ -404,8 +405,8 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 
 			[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && escape
 			if [[ $var_filial = "" ]]; then
-				var_exitcode="200"
 				message "--warning" "Необходимо выбрать филиал."
+				var_exitcode="200"
 				continue
 			fi
 		done

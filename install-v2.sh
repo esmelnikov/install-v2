@@ -224,16 +224,16 @@ echo "Каталог установки: $var_installdir"
 echo "Шаг установки: $var_stage"
 
 
-
-pause
-
-
-var_filialready=1
+####### For debug #######
+var_filialready=0
 if [[ $var_filialready = 0 ]]; then
 	var_message="Для настройки компьютера Alt Linux вашего филиала необходимо предоставить дополнительные данные. Информацию можно получить обратившись по адресу: es.melnikov@ttg.gazprom.ru"
 	message "--warning" "$var_message"
 	exit 0
 fi
+
+
+pause
 
 var_os="$var_installdir/.os"
 echo workstation >"${var_os}"

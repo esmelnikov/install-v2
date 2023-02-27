@@ -230,6 +230,7 @@ echo "Шаг установки: $var_stage"
 var_filialready=0
 if [[ $var_filialready = 0 ]]; then
 	message "--warning" "Для настройки компьютера Alt Linux вашего филиала необходимо предоставить дополнительные данные. Информацию можно получить обратившись по адресу: es.melnikov@ttg.gazprom.ru"
+	clear
 	exit 0
 fi
 

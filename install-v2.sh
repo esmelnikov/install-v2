@@ -96,7 +96,7 @@ function cleanup() {
 	#		[[ -f "$var_stage" ]] && rm -f "$var_stage"
 	#		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
 	#	fi
-	
+
 	echo 'CLEANUP'
 }
 
@@ -206,7 +206,6 @@ var_installdir="/home/$(logname)/.install"
 var_stage="$var_installdir/.stage"
 var_os="$var_installdir/.os"
 
-
 if [[ ! "$(command -v shutdown)" ]]; then
 	message "--warning" "Скрипт запущен некорректно. В дистрибутивах ALT для получения прав root следует \
 	использовать команду su- (su с \"минусом\"). Выполните команду su- в терминале, а затем запустите скрипт."
@@ -228,7 +227,6 @@ echo "Домашний каталог пользователя запустив�
 echo "Переменная окружения \$HOME: $HOME"
 echo "Каталог установки: $var_installdir"
 #echo "Шаг установки: $var_stage"
-
 
 if [[ ! -f "$var_stage" ]]; then
 	echo "ШАГ ПОДГОТОВКА начало..."
@@ -263,20 +261,289 @@ if [[ ! -f "$var_stage" ]]; then
 	exec "$var_homedir/$var_scriptname"
 fi
 
+# ШАГ 0 НАЧАЛО
+if [[ "$(cat "$var_stage")" = 0 ]]; then
+	echo "ШАГ $(cat "$var_stage") начало..."
+	echo "Скрипт расположен в каталоге: $var_scriptdir"
+	echo "Скрипт запущен пользователем: $(logname)"
+	echo "Скрипт выполняется с правами пользователя: $(whoami)"
+	echo "Переменная окружения \$HOME: $HOME"
 
-####### For debug #######
-var_filialready=1
-if [[ $var_filialready = 0 ]]; then
-	message "--warning" "Для настройки компьютера Alt Linux вашего филиала необходимо предоставить дополнительные данные. Информацию можно получить обратившись по адресу: es.melnikov@ttg.gazprom.ru"
-	clear
-	exit 0
+	if [[ "$(cat "$var_os")" = "workstation" ]]; then
+		# Пакеты для установки из репозитория на ОС Alt Workstation
+		cat >"$var_installdir/installreppkgs" <<-EOF
+			pcsc-lite-ccid
+			pcsc-tools-gui
+			stunnel4
+			libidn1.34
+			pwgen
+			adcli
+			alterator-audit
+			alterator-grub
+			gpupdate
+			alterator-gpupdate
+			alt-csp-cryptopro
+			LibreOffice-plugin-altcsp
+			mate-file-manager-actions
+			evolution
+			evolution-ews
+			pidgin
+			pidgin-sipe
+			pidgin-libnotify
+			chromium-gost
+			remmina
+			remmina-plugins-rdp
+			remmina-plugins-vnc
+			easypaint
+			libsasl2-3
+			postfix-tls
+			postfix-cyrus
+			fonts-ttf-ms
+			doublecmd
+			gtk-theme-windows-10
+		EOF
+		# Дополнительные сторонние пакеты rpm для установки
+		cat >"$var_installdir/installextpkgs" <<-EOF
+			ICAClient-rhel-13.10.0.20-0.x86_64.rpm
+			ctxusb-2.7.20-1.x86_64.rpm
+			r7-office.rpm
+			ifd-rutokens_1.0.4_1.x86_64.rpm
+		EOF
+		# Пакеты для удаления apt-indicator
+		cat >"$var_installdir/delpkgs" <<-EOF
+			mate-file-manager-share
+			libnss-mdns
+			smtube
+			gnome-software
+			openct
+			pcsc-lite-openct
+		EOF
+	else
+		# Пакеты для установки на Alt Server
+		cat >"$var_installdir/installreppkgs" <<-EOF
+			task-auth-ad-sssd
+			libsasl2-3
+			postfix-tls
+			postfix-cyrus
+		EOF
+	fi
+
+	echo "Загрузка настроек для скрипта..."
+	curl -# -o "$var_installdir/setting.zip" "$var_scriptrepo/setting.zip" || echo "Ошибка загрузки файла setting.zip"
+	echo "Извлечение архива..."
+	unzip -qo "$var_installdir/setting.zip" -d "$var_installdir" && echo "Архив setting.zip успешно распакован"
+
+	####### Choise filial #######
+	var_menu=(
+		AU "Администрация Общества"
+		BU "Белоярское отделение УОВОФ"
+		U2 "Белоярское УАВР"
+		T2 "Белоярское УТТиСТ"
+		BB "Бобровское ЛПУМГ"
+		WK "Верхнеказымское ЛПУМГ"
+		IW "Ивдельское ЛПУМГ"
+		IB "ИТЦ Белоярский"
+		IK "ИТЦ Краснотурьинск"
+		IN "ИТЦ Надым"
+		IY "ИТЦ Югорск"
+		KZ "Казымское ЛПУМГ"
+		KP "Карпинское ЛПУМГ"
+		KM "Комсомольское ЛПУМГ"
+		KT "Краснотурьинское ЛПУМГ"
+		FO "Культурно-спортивный комплекс НОРД"
+		LU "Лонг-Юганское ЛПУМГ"
+		NA "Надымское ЛПУМГ"
+		NK "Надымское отделение УОВОФ"
+		U1 "Надымское УАВР"
+		T1 "Надымское УТТиСТ"
+		NT "Нижнетуринское ЛПУМГ"
+		LA "Нижнетуринское ЛПУМГ (Лялинская промплощадка)"
+		NU "Ново-Уренгойское ЛПУМГ (Ново-Уренгойская промплощадка)"
+		PU "Ново-Уренгойское ЛПУМГ (Пуровская промплощадка)"
+		NY "Ныдинское ЛПУМГ"
+		OK "Октябрьское ЛПУМГ"
+		PA "Пангодинское ЛПУМГ"
+		PE "Пелымское ЛПУМГ"
+		PG "Перегребненское ЛПУМГ"
+		PH "Правохеттинское ЛПУМГ"
+		B2 "Приобское УМТСиК"
+		PZ "Приозерное ЛПУМГ"
+		PN "Пунгинское ЛПУМГ"
+		PF "Санаторий-профилакторий"
+		SR "Сорумское ЛПУМГ"
+		SN "Сосновское ЛПУ"
+		SO "Сосьвинское ЛПУМГ"
+		TG "Таежное ЛПУМГ"
+		UK "Управление организации восстановления основных фондов (УОВОФ)"
+		CU "Управление по эксплуатации зданий и сооружений (УЭЗиС)"
+		US "Управление связи"
+		UR "Уральское ЛПУМГ"
+		KI "Учебно-производственный центр Игрим"
+		KK "Учебно-производственный центр Югорск"
+		U3 "Югорское УАВР"
+		B1 "Югорское УМТСиК"
+		T3 "Югорское УТТиСТ"
+		YG "Ягельное ЛПУМГ"
+		YS "Ямбуpгское ЛПУМГ (Елец)"
+		YA "Ямбуpгское ЛПУМГ (Пангоды)"
+	)
+
+	var_title="Выбор филиала"
+	var_text="Для корректной настройки АРМ необходимо выбрать филиал Общества"
+	if [ "$DISPLAY" ]; then
+		var_column1="Код"
+		var_column2="Филиал"
+		var_exitcode="200"
+		while [ "$var_exitcode" -ne 0 ]; do
+			var_filial=$(zenity --modal --list --title "$var_title" --text="$var_text" --width 510 --height=400 --hide-column=1 --column="$var_column1" --column="$var_column2" "${var_menu[@]}")
+			var_exitcode=$?
+			[[ "$var_exitcode" = "1" ]] && echo "Вы завершили работу скрипта..." && exit 0
+			echo "${var_exitcode}"
+			echo "${var_exitcode}"
+			[[ $var_filial = "" ]] && var_exitcode="200" && zenity --modal --warning --width 300 --height=100 --text="Необходимо выбрать филиал." && continue
+		done
+	else
+		height=18
+		width=73
+		choice_height=11
+		backtitle="Индивидуальные настройки АРМ филиала"
+		set +e
+		trap '' ERR
+		var_filial=$(dialog --clear --no-tags --cancel-label "Выход" --backtitle "$backtitle" --title "$var_title" --menu "$var_text" "$height" "$width" "$choice_height" "${var_menu[@]}" 2>&1 >/dev/tty)
+		var_exitcode=$?
+		set -e
+		trap 'error ${LINENO}' ERR
+		[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Вы завершили работу скрипта..." && exit 0
+		clear
+	fi
+	echo "${var_filial}"
+
+	base64 -d "$var_installdir/setting.enc" >"$var_installdir/setting.orig"
+
+	var_filialcode=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f2)
+	var_domain=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f3)
+	var_usergrp=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f4)
+	var_fadmingrp=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f5)
+	var_fsvcgrp=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f6)
+	var_gadmingrp=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f7)
+	var_kavsshkey=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f8)
+	var_repo=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f9)
+	var_email=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f10)
+	var_mailsrv=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f11)
+	var_filialready=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f12)
+	[[ $var_repo = "" ]] && var_repo=$(grep -e "^AU" "$var_installdir/setting.orig" | cut -d";" -f9)
+	[[ $var_mailsrv = "" ]] && var_mailsrv=$(grep -e "^AU" "$var_installdir/setting.orig" | cut -d";" -f11)
+	echo "$var_filialcode" >"$var_installdir/filialcode"
+	echo "$var_domain" >"$var_installdir/domain"
+	echo "$var_fadmingrp" >"$var_installdir/fadmingrp"
+	echo "$var_fsvcgrp" >"$var_installdir/fsvcgrp"
+	echo "$var_gadmingrp" >"$var_installdir/gadmingrp"
+	echo "$var_kavsshkey" >"$var_installdir/kavsshkey"
+	echo "$var_email" >"$var_installdir/email"
+	echo "$var_mailsrv" >"$var_installdir/mailsrv"
+	var_branch=$(grep -oE '^VERSION=.*' /etc/os-release | sed -e 's/^VERSION="//g' -e 's/"$//g' | cut -d"." -f1)
+	echo "$var_branch" >"$var_installdir/branch"
+	cat >"$var_installdir/77-kaspersky" <<-EOF
+		%$var_fsvcgrp ALL=(ALL) NOPASSWD: ALL
+	EOF
+	cat >"$var_installdir/role" <<-EOF
+		$var_usergrp:users
+		$var_fadmingrp:localadmins
+		$var_gadmingrp:localadmins
+	EOF
+	cat >"$var_installdir/local.list" <<-EOF
+		rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64 classic
+		rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64-i586 classic
+		rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/noarch classic
+	EOF
+
+	rm -f "$var_installdir/setting.orig"
+
+	####### For debug #######
+	var_filialready=1
+	if [[ $var_filialready = 0 ]]; then
+		message "--warning" "Для настройки компьютера Alt Linux вашего филиала необходимо предоставить дополнительные данные. Информацию можно получить обратившись по адресу: es.melnikov@ttg.gazprom.ru"
+		clear
+		exit 0
+	fi
+
+
+	var_cod=$(cat "$var_installdir/filialcode")
+	var_return="200"
+	while [ "$var_return" -ne 0 ]; do
+		set +e
+		var_hostname=$(zenity --modal --entry --entry-text="WS-$var_cod-L001" --title "Имя компьютера" --text "Введите имя компьютера в верхнем регистре")
+		var_return=$?
+		var_hostname=${var_hostname^^}
+		[[ $var_hostname = "" ]] && var_return="200" && zenity --modal --warning --width 300 --height=100 --text="Имя компьютера должно быть указано" && continue
+		if [ "$(echo -n "$var_hostname" | wc -m)" -gt 15 ]; then
+			zenity --modal --error --width 300 --height=100 --text="Имя компьютера не может содержать более 15 символов" && var_return=200 && continue
+		else
+			if ! grep -E "^WS-${var_cod}-[A-Z]?{4}-?[L][0-9]{3}$" <<<"$var_hostname"; then
+				zenity --modal --error --width 300 --height=100 --text="Имя компьютера должно соответствовать регламенту. Шаблон для вашего филиала: WS-$var_cod-Lnnn или WS-$var_cod-ssss-Lnnn, где s-символы от A до Z, n-цифры от 0 до 9, " && var_return=200 && continue
+			fi
+		fi
+	done
+	set -e
+
+	zenity --modal --warning --width 300 --height=100 --ok-label="Учетная запись компьютера $var_hostname создана" --text="Перед продолжением работы убедитесь, что в организационной единице WorstationsLnx вашего филиала создана учетная запись компьютера с именем  $var_hostname"
+
+	cat >"$var_installdir/hostname" <<-EOF
+		${var_hostname,,}
+	EOF
+
+	requestcred
+
+	cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
+		#!/bin/bash
+		# from install.sh script
+		# 15/02/2023
+		mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
+		var_resolvfiles+=(/etc/resolv.conf /run/NetworkManager/resolv.conf /run/NetworkManager/no-stub-resolv.conf)
+		for var_resolvfiles in "\${var_resolvfiles[@]}"; do
+			[[ ! -f "\$var_resolvfiles" ]] && continue
+			if grep "^search" "\$var_resolvfiles"; then
+				sed -i "s/^search.*/search $(cat "$var_installdir/domain") ttg.gazprom.ru/1" "\$var_resolvfiles"
+			else
+				echo "search $(cat "$var_installdir/domain") ttg.gazprom.ru" >>"\$var_resolvfiles"
+			fi
+			if grep "^options single-reques.*" "\$var_resolvfiles"; then
+				sed -i "s/^options single-reques.*/options single-request-reopen/1" "\$var_resolvfiles"
+			else
+				echo "options single-request-reopen" >>"\$var_resolvfiles"
+			fi
+		done
+		/sbin/update_chrooted conf
+		exit 0
+	EOF
+
+	chmod +x "/etc/NetworkManager/dispatcher.d/99-fix-slow-dns"
+
+	nmcli con reload
+	echo "Ожидание инициализации сети..."
+	nm-online -t 120
+	sleep 5
+
+	if [[ "$var_cod" != "NY" ]]; then var_repo="mirror"; fi
+	echo "Загрузка необходимых для установки компонентов..."
+	curl -#C - -o "$var_installdir/linux-amd64.tgz" "http://${var_repo}.ttg.gazprom.ru/distribs/criptopro50r3/linux-amd64.tgz" || echo "Ошибка загрузки файла linux-amd64.tgz"
+	curl -#C - -o "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/jacarta213/jacartauc_2.13.12.3203_alt_x64.zip" || echo "Ошибка загрузки файла jacartauc_2.13.12.3203_alt_x64.zip"
+	curl -#C - -o "$var_installdir/ius.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ius.zip" || echo "Ошибка загрузки файла ius.zip"
+	curl -#C - -o "$var_installdir/ca.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ca.zip" || echo "Ошибка загрузки файла ca.zip"
+	echo "Загрузка компонентов успешно завершена..."
+	echo "Загрузка дополнительных сторонних пакетов rpm..."
+	var_installextpkgs=$(tr '\n' ' ' <"$var_installdir/installextpkgs")
+	for i in $var_installextpkgs; do
+		echo "Загрузка пакета $i..."
+		curl -#C - -o "$var_installdir/$i" "http://${var_repo}.ttg.gazprom.ru/distribs/rpm/$i" || echo "Ошибка загрузки файла $i"
+		echo "Пакет $i успешно загружен..."
+	done
+	echo "ШАГ 0 завершен..." && echo "1" >"$var_stage" && echo "Статус установки сохранен..."
 fi
-
+# ШАГ 0 КОНЕЦ
 
 echo "Test"
 pause
-
-
 
 echo workstation >"${var_os}"
 var_cod="AU"
@@ -357,8 +624,6 @@ echo "var_homedir: $var_homedir"
 echo "var_installdir: $var_installdir"
 echo "var_stage: $var_stage"
 
-
-
 if [ ! -f "/var/log/gty/.install/complete.log" ]; then
 	var_message="Вы пытаетесь запустить скрипт повторно, после успешного завершения."
 	message "--warning" "$var_message"
@@ -375,90 +640,6 @@ echo "var_homedir: $var_homedir"
 echo "var_installdir: $var_installdir"
 echo "var_stage: $var_stage"
 
-####### Choise filial #######
-var_menu=(
-	AU "Администрация Общества"
-	BU "Белоярское отделение УОВОФ"
-	U2 "Белоярское УАВР"
-	T2 "Белоярское УТТиСТ"
-	BB "Бобровское ЛПУМГ"
-	WK "Верхнеказымское ЛПУМГ"
-	IW "Ивдельское ЛПУМГ"
-	IB "ИТЦ Белоярский"
-	IK "ИТЦ Краснотурьинск"
-	IN "ИТЦ Надым"
-	IY "ИТЦ Югорск"
-	KZ "Казымское ЛПУМГ"
-	KP "Карпинское ЛПУМГ"
-	KM "Комсомольское ЛПУМГ"
-	KT "Краснотурьинское ЛПУМГ"
-	FO "Культурно-спортивный комплекс НОРД"
-	LU "Лонг-Юганское ЛПУМГ"
-	NA "Надымское ЛПУМГ"
-	NK "Надымское отделение УОВОФ"
-	U1 "Надымское УАВР"
-	T1 "Надымское УТТиСТ"
-	NT "Нижнетуринское ЛПУМГ"
-	LA "Нижнетуринское ЛПУМГ (Лялинская промплощадка)"
-	NU "Ново-Уренгойское ЛПУМГ (Ново-Уренгойская промплощадка)"
-	PU "Ново-Уренгойское ЛПУМГ (Пуровская промплощадка)"
-	NY "Ныдинское ЛПУМГ"
-	OK "Октябрьское ЛПУМГ"
-	PA "Пангодинское ЛПУМГ"
-	PE "Пелымское ЛПУМГ"
-	PG "Перегребненское ЛПУМГ"
-	PH "Правохеттинское ЛПУМГ"
-	B2 "Приобское УМТСиК"
-	PZ "Приозерное ЛПУМГ"
-	PN "Пунгинское ЛПУМГ"
-	PF "Санаторий-профилакторий"
-	SR "Сорумское ЛПУМГ"
-	SN "Сосновское ЛПУ"
-	SO "Сосьвинское ЛПУМГ"
-	TG "Таежное ЛПУМГ"
-	UK "Управление организации восстановления основных фондов (УОВОФ)"
-	CU "Управление по эксплуатации зданий и сооружений (УЭЗиС)"
-	US "Управление связи"
-	UR "Уральское ЛПУМГ"
-	KI "Учебно-производственный центр Игрим"
-	KK "Учебно-производственный центр Югорск"
-	U3 "Югорское УАВР"
-	B1 "Югорское УМТСиК"
-	T3 "Югорское УТТиСТ"
-	YG "Ягельное ЛПУМГ"
-	YS "Ямбуpгское ЛПУМГ (Елец)"
-	YA "Ямбуpгское ЛПУМГ (Пангоды)"
-)
-
-var_title="Выбор филиала"
-var_text="Для корректной настройки АРМ необходимо выбрать филиал Общества"
-if [ "$DISPLAY" ]; then
-	var_column1="Код"
-	var_column2="Филиал"
-	var_exitcode="200"
-	while [ "$var_exitcode" -ne 0 ]; do
-		var_filial=$(zenity --modal --list --title "$var_title" --text="$var_text" --width 510 --height=400 --hide-column=1 --column="$var_column1" --column="$var_column2" "${var_menu[@]}")
-		var_exitcode=$?
-		[[ "$var_exitcode" = "1" ]] && echo "Вы завершили работу скрипта..." && exit 0
-		echo "${var_exitcode}"
-		echo "${var_exitcode}"
-		[[ $var_filial = "" ]] && var_exitcode="200" && zenity --modal --warning --width 300 --height=100 --text="Необходимо выбрать филиал." && continue
-	done
-else
-	height=18
-	width=73
-	choice_height=11
-	backtitle="Индивидуальные настройки АРМ филиала"
-	set +e
-	trap '' ERR
-	var_filial=$(dialog --clear --no-tags --cancel-label "Выход" --backtitle "$backtitle" --title "$var_title" --menu "$var_text" "$height" "$width" "$choice_height" "${var_menu[@]}" 2>&1 >/dev/tty)
-	var_exitcode=$?
-	set -e
-	trap 'error ${LINENO}' ERR
-	[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Вы завершили работу скрипта..." && exit 0
-	clear
-fi
-echo "${var_filial}"
 ####### Choise filial #######
 
 echo '222222'

@@ -395,8 +395,12 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		var_column2="Филиал"
 		var_exitcode="200"
 		while [ "$var_exitcode" -ne 0 ]; do
+			set +e
+			trap '' ERR
 			var_filial=$(zenity --modal --list --title "$var_title" --text="$var_text" --width 510 --height=400 --hide-column=1 --column="$var_column1" --column="$var_column2" "${var_menu[@]}")
 			var_exitcode=$?
+			set -e
+			trap 'error ${LINENO}' ERR
 			[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Выполнение скрипта прервано пользователем..." && exit 0
 			[[ $var_filial = "" ]] && var_exitcode="200" && zenity --modal --warning --width 300 --height=100 --text="Необходимо выбрать филиал." && continue
 		done

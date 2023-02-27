@@ -534,7 +534,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	####### Enter hostname #######
 
 	if [[ "$(cat "$var_os")" = "workstation" ]]; then
-		var_msgou="WorstationsLnx"
+		var_msgou="WorkstationsLnx"
 	else
 		var_msgou="ServersLnx"
 	fi

@@ -394,7 +394,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	if [ "$DISPLAY" ]; then
 		var_column1="Код"
 		var_column2="Филиал"
-		var_exitcode="200"
+		var_exitcode=200
 		while [ "$var_exitcode" -ne 0 ]; do
 			set +e
 			trap '' ERR
@@ -402,11 +402,10 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			var_exitcode=$?
 			set -e
 			trap 'error ${LINENO}' ERR
-
 			[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && escape
 			if [[ $var_filial = "" ]]; then
 				message "--warning" "Необходимо выбрать филиал."
-				var_exitcode="200"
+				var_exitcode=200
 				continue
 			fi
 		done
@@ -476,6 +475,61 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		clear
 		exit 0
 	fi
+
+	####### Enter hostname #######
+	#var_cod=$(cat "$var_installdir/filialcode")
+	var_title="Имя компьютера"
+	var_text="Введите имя компьютера"
+	var_exitcode="200"
+	if [[ "$(cat "$var_os")" = "workstation" ]]; then
+		var_prefix=WS
+		var_symbol=4
+		var_number=3
+		var_template=L001
+	else
+		var_prefix=SV
+		var_symbol=5
+		var_number=2
+		var_template=L01
+	fi
+	while [ "$var_exitcode" -ne 0 ]; do
+		set +e
+		trap '' ERR
+		if [[ "$DISPLAY" ]]; then
+			var_hostname=$(zenity --modal --entry --entry-text="$var_prefix-$var_cod-$var_template" --title "$var_title" --text "$var_text")
+		else
+			var_hostname=$(dialog --clear --max-input 15 --no-cancel --trim --title "$var_title" --inputbox "$var_text" 8 40 "$var_prefix-$var_cod-$var_template" 2>&1 >/dev/tty)
+		fi
+		set -e
+		trap 'error ${LINENO}' ERR
+		var_exitcode=$?
+		echo $var_exitcode
+		if [[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]]; then
+			escape
+		fi
+		var_hostname=${var_hostname^^}
+		if [[ $var_hostname = "" ]]; then
+			message "--error" "Имя компьютера должно быть указано"
+			var_exitcode=200
+			continue
+		fi
+		if [[ "$(echo -n "$var_hostname" | wc -m)" -gt 15 ]]; then
+			message "--error" "Имя компьютера не может содержать более 15 символов"
+			var_exitcode=200
+			continue
+		else
+			if ! grep -E "^${var_prefix}-${var_cod}-[A-Z]?{${var_symbol}}-?[L][0-9]{${var_number}}$" <<<"$var_hostname"; then
+				message "--error" "Имя компьютера должно соответствовать регламенту. Шаблон для вашего филиала:\n${var_prefix}-${var_cod}-$var_template или ${var_prefix}-${var_cod}-S{1...${var_symbol}}-$var_template,\nгде S-символы от A до Z"
+				var_exitcode=200
+				continue
+			fi
+		fi
+	done
+	clear
+
+	echo "${var_exitcode}"
+	echo "${var_hostname}"
+	####### Enter hostname #######
 
 	var_cod=$(cat "$var_installdir/filialcode")
 	var_return="200"
@@ -557,60 +611,6 @@ pause
 echo workstation >"${var_os}"
 var_cod="AU"
 
-####### Enter hostname #######
-#var_cod=$(cat "$var_installdir/filialcode")
-var_title="Имя компьютера"
-var_text="Введите имя компьютера"
-var_exitcode="200"
-if [[ "$(cat "$var_os")" = "workstation" ]]; then
-	var_prefix=WS
-	var_symbol=4
-	var_number=3
-	var_template=L001
-else
-	var_prefix=SV
-	var_symbol=5
-	var_number=2
-	var_template=L01
-fi
-while [ "$var_exitcode" -ne 0 ]; do
-	set +e
-	trap '' ERR
-	if [[ "$DISPLAY" ]]; then
-		var_hostname=$(zenity --modal --entry --entry-text="$var_prefix-$var_cod-$var_template" --title "$var_title" --text "$var_text")
-	else
-		var_hostname=$(dialog --clear --max-input 15 --no-cancel --trim --title "$var_title" --inputbox "$var_text" 8 40 "$var_prefix-$var_cod-$var_template" 2>&1 >/dev/tty)
-	fi
-	set -e
-	trap 'error ${LINENO}' ERR
-	var_exitcode=$?
-	echo $var_exitcode
-	if [[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]]; then
-		escape
-	fi
-	var_hostname=${var_hostname^^}
-	if [[ $var_hostname = "" ]]; then
-		message "--error" "Имя компьютера должно быть указано"
-		var_exitcode="200"
-		continue
-	fi
-	if [[ "$(echo -n "$var_hostname" | wc -m)" -gt 15 ]]; then
-		message "--error" "Имя компьютера не может содержать более 15 символов"
-		var_exitcode=200
-		continue
-	else
-		if ! grep -E "^${var_prefix}-${var_cod}-[A-Z]?{${var_symbol}}-?[L][0-9]{${var_number}}$" <<<"$var_hostname"; then
-			message "--error" "Имя компьютера должно соответствовать регламенту. Шаблон для вашего филиала:\n${var_prefix}-${var_cod}-$var_template или ${var_prefix}-${var_cod}-S{1...${var_symbol}}-$var_template,\nгде S-символы от A до Z"
-			var_exitcode=200
-			continue
-		fi
-	fi
-done
-clear
-
-echo "${var_exitcode}"
-echo "${var_hostname}"
-####### Enter hostname #######
 sleep 1d
 
 echo "Все предварительные условия соблюдены"

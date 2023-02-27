@@ -94,6 +94,7 @@ function cleanup() {
 	#		[[ -f "$var_stage" ]] && rm -f "$var_stage"
 	#		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
 	#	fi
+	
 	echo 'CLEANUP'
 }
 
@@ -119,7 +120,7 @@ function error() {
 
 function escape {
 	clear
-	echo "Выполнение скрипта завершено..."
+	echo "Выполнение скрипта прервано пользователем..."
 	exit 0
 }
 
@@ -229,7 +230,7 @@ echo "Шаг установки: $var_stage"
 
 
 ####### For debug #######
-var_filialready=0
+var_filialready=1
 if [[ $var_filialready = 0 ]]; then
 	message "--warning" "Для настройки компьютера Alt Linux вашего филиала необходимо предоставить дополнительные данные. Информацию можно получить обратившись по адресу: es.melnikov@ttg.gazprom.ru"
 	clear

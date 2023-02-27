@@ -133,7 +133,7 @@ function message {
 	trap '' ERR
 	[[ "$1" == "--warning" ]] && var_title="Предупреждение[!]"
 	[[ "$1" == "--error" ]] && var_title="Ошибка[!!!]"
-	if [[ "$DISPLAY" ]]; then
+	if [ "$DISPLAY"x = x ]; then
 		zenity --modal "$1" --width 300 --height=100 --text="$2"
 		var_exitcode=$?
 	else
@@ -159,7 +159,7 @@ function requestcred() {
 		local var_credential
 		local var_username
 		local var_password
-		if [[ "$DISPLAY" ]]; then
+		if [ "$DISPLAY"x = x ]; then
 			var_credential=$(zenity --modal --password --username)
 			var_exitcode=$?
 		else
@@ -393,7 +393,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 
 	var_title="Выбор филиала"
 	var_text="Для корректной настройки АРМ необходимо выбрать филиал Общества"
-	if [ "$DISPLAY" ]; then
+	if [ "$DISPLAY"x = x ]; then
 		var_column1="Код"
 		var_column2="Филиал"
 		var_exitcode=200
@@ -497,7 +497,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	while [ "$var_exitcode" -ne 0 ]; do
 		set +e
 		trap '' ERR
-		if [[ "$DISPLAY" ]]; then
+		if [ "$DISPLAY"x = x ]; then
 			var_hostname=$(zenity --modal --entry --entry-text="$var_prefix-$var_cod-$var_template" --title "$var_title" --text "$var_text")
 		else
 			var_hostname=$(dialog --clear --max-input 15 --no-cancel --trim --title "$var_title" --inputbox "$var_text" 8 40 "$var_prefix-$var_cod-$var_template" 2>&1 >/dev/tty)

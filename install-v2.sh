@@ -544,9 +544,9 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		${var_hostname,,}
 	EOF
 
-	pause
-	
 	requestcred
+
+	pause
 
 	cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
 		#!/bin/bash

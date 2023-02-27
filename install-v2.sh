@@ -119,7 +119,7 @@ function error() {
 
 function escape {
 	clear
-	echo "Вы завершили работу скрипта..."
+	echo "Выполнение скрипта завершено..."
 	exit 0
 }
 

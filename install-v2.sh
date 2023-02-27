@@ -204,6 +204,7 @@ var_scriptdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 var_homedir="/home/$(logname)"
 var_installdir="/home/$(logname)/.install"
 var_stage="$var_installdir/.stage"
+var_os="$var_installdir/.os"
 
 
 if [[ ! "$(command -v shutdown)" ]]; then
@@ -226,7 +227,7 @@ echo "Скрипт выполняется с правами пользовате
 echo "Домашний каталог пользователя запустившего скрипт: $var_homedir"
 echo "Переменная окружения \$HOME: $HOME"
 echo "Каталог установки: $var_installdir"
-echo "Шаг установки: $var_stage"
+#echo "Шаг установки: $var_stage"
 
 
 if [[ ! -f "$var_stage" ]]; then
@@ -276,7 +277,7 @@ echo "Test"
 pause
 
 
-var_os="$var_installdir/.os"
+
 echo workstation >"${var_os}"
 var_cod="AU"
 

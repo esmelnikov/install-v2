@@ -227,6 +227,7 @@ echo "Скрипт выполняется с правами пользовате
 echo "Домашний каталог пользователя запустившего скрипт: $var_homedir"
 echo "Переменная окружения \$HOME: $HOME"
 echo "Каталог установки: $var_installdir"
+echo "Версия скрипта: $var_version"
 #echo "Шаг установки: $var_stage"
 
 if [[ ! -f "$var_stage" ]]; then

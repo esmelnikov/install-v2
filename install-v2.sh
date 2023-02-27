@@ -476,6 +476,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	fi
 
 	####### Enter hostname #######
+
 	var_cod=$(cat "$var_installdir/filialcode")
 	var_title="Имя компьютера"
 	var_text="Введите имя компьютера"
@@ -530,32 +531,15 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	echo "${var_hostname}"
 	####### Enter hostname #######
 
-	pause
-
-	var_cod=$(cat "$var_installdir/filialcode")
-	var_return="200"
-	while [ "$var_return" -ne 0 ]; do
-		set +e
-		var_hostname=$(zenity --modal --entry --entry-text="WS-$var_cod-L001" --title "Имя компьютера" --text "Введите имя компьютера в верхнем регистре")
-		var_return=$?
-		var_hostname=${var_hostname^^}
-		[[ $var_hostname = "" ]] && var_return="200" && zenity --modal --warning --width 300 --height=100 --text="Имя компьютера должно быть указано" && continue
-		if [ "$(echo -n "$var_hostname" | wc -m)" -gt 15 ]; then
-			zenity --modal --error --width 300 --height=100 --text="Имя компьютера не может содержать более 15 символов" && var_return=200 && continue
-		else
-			if ! grep -E "^WS-${var_cod}-[A-Z]?{4}-?[L][0-9]{3}$" <<<"$var_hostname"; then
-				zenity --modal --error --width 300 --height=100 --text="Имя компьютера должно соответствовать регламенту. Шаблон для вашего филиала: WS-$var_cod-Lnnn или WS-$var_cod-ssss-Lnnn, где s-символы от A до Z, n-цифры от 0 до 9, " && var_return=200 && continue
-			fi
-		fi
-	done
-	set -e
-
-	zenity --modal --warning --width 300 --height=100 --ok-label="Учетная запись компьютера $var_hostname создана" --text="Перед продолжением работы убедитесь, что в организационной единице WorstationsLnx вашего филиала создана учетная запись компьютера с именем  $var_hostname"
+	message "--warning" "Перед продолжением работы убедитесь, что в организационной единице WorstationsLnx вашего филиала создана учетная запись компьютера с именем  $var_hostname"
+	#zenity --modal --warning --width 300 --height=100 --ok-label="Учетная запись компьютера $var_hostname создана" --text="Перед продолжением работы убедитесь, что в организационной единице WorstationsLnx вашего филиала создана учетная запись компьютера с именем  $var_hostname"
 
 	cat >"$var_installdir/hostname" <<-EOF
 		${var_hostname,,}
 	EOF
 
+	pause
+	
 	requestcred
 
 	cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF

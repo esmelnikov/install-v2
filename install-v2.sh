@@ -234,7 +234,7 @@ if [[ $var_filialready = 0 ]]; then
 fi
 
 
-
+echo "Test"
 pause
 
 

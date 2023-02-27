@@ -401,6 +401,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			var_exitcode=$?
 			set -e
 			trap 'error ${LINENO}' ERR
+			
 			[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Выполнение скрипта прервано пользователем..." && exit 0
 			[[ $var_filial = "" ]] && var_exitcode="200" && zenity --modal --warning --width 300 --height=100 --text="Необходимо выбрать филиал." && continue
 		done

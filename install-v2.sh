@@ -575,7 +575,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 
 	nmcli con reload
 	echo "Ожидание инициализации сети..."
-	nm-online -t 120
+	nm-online -t 60
 	sleep 5
 
 	if [[ "$var_cod" != "NY" ]]; then var_repo="mirror"; fi

@@ -397,9 +397,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		while [ "$var_exitcode" -ne 0 ]; do
 			var_filial=$(zenity --modal --list --title "$var_title" --text="$var_text" --width 510 --height=400 --hide-column=1 --column="$var_column1" --column="$var_column2" "${var_menu[@]}")
 			var_exitcode=$?
-			[[ "$var_exitcode" = "1" ]] && echo "Вы завершили работу скрипта..." && exit 0
-			echo "${var_exitcode}"
-			echo "${var_exitcode}"
+			[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Выполнение скрипта прервано пользователем..." && exit 0
 			[[ $var_filial = "" ]] && var_exitcode="200" && zenity --modal --warning --width 300 --height=100 --text="Необходимо выбрать филиал." && continue
 		done
 	else
@@ -413,10 +411,13 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		var_exitcode=$?
 		set -e
 		trap 'error ${LINENO}' ERR
-		[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Вы завершили работу скрипта..." && exit 0
+		[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Выполнение скрипта прервано пользователем..." && exit 0
 		clear
 	fi
+	####### For debug #######
 	echo "${var_filial}"
+
+	pause
 
 	base64 -d "$var_installdir/setting.enc" >"$var_installdir/setting.orig"
 

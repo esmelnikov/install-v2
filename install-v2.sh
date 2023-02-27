@@ -224,6 +224,10 @@ echo "Каталог установки: $var_installdir"
 echo "Шаг установки: $var_stage"
 
 
+
+
+
+
 ####### For debug #######
 var_filialready=0
 if [[ $var_filialready = 0 ]]; then

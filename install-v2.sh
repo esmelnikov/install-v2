@@ -4,8 +4,10 @@
 # 3.
 # 7 Команда для запуска: bash <(curl -#LJ https://raw.githubusercontent.com/esmelnikov/install-v2/main/install-v2.sh)
 
+# var_scriptrepo="http://mirror.ttg.gazprom.ru/distribs"
+var_scriptrepo="https://raw.githubusercontent.com/esmelnikov/install-v2/main"
 var_version="02.24.02.23"
-var_scriptname="install.sh"
+var_scriptname="install-v2.sh"
 set -o pipefail # trace ERR through pipes
 set -o errtrace # trace ERR through 'time command' and other functions
 #set -o nounset   ## set -u : exit the script if you try to use an uninitialised variable
@@ -227,6 +229,38 @@ echo "Каталог установки: $var_installdir"
 echo "Шаг установки: $var_stage"
 
 
+if [[ ! -f "$var_stage" ]]; then
+	echo "ШАГ ПОДГОТОВКА начало..."
+	echo "Создание каталога установки..."
+	[[ -d "$var_installdir" ]] || (mkdir "$var_installdir" && echo "Каталог установки успешно создан")
+
+	grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f4 | tee "$var_os"
+
+	if [[ "$(cat "$var_os")" = "server" ]]; then
+		echo "Отключение всех существующих репозиториев"
+		apt-repo rm all
+		echo "Предварительная настройка локального репозитория..."
+		var_branch=$(grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f5 | cut -d'.' -f1)
+		var_repo="mirorr-au"
+		cat >"/etc/apt/sources.list.d/local.list" <<-EOF
+			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64 classic
+			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64-i586 classic
+			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/noarch classic
+		EOF
+		echo "Установка компонентов, необходимых для работы скрипта..."
+		echo "Обновление индексов пакетов..."
+		apt-get update -q
+		apt-get install -yq sudo
+		apt-get install -yq dialog
+		# apt-get install task-auth-ad-sssd
+	fi
+	echo "Загрузка скрипта для локального запуска..."
+	[[ ! -f "$var_stage" ]] && curl -# -o "$var_homedir/$var_scriptname" "$var_scriptrepo/$var_scriptname" || echo "Ошибка загрузки файла $var_scriptname"
+	chown "$(logname):" "$var_homedir/$var_scriptname"
+	chmod +x "$var_homedir/$var_scriptname"
+	echo "ШАГ ПОДГОТОВКА завершен..." && echo "0" >"$var_stage" && echo "Статус установки сохранен..."
+	exec "$var_homedir/$var_scriptname"
+fi
 
 
 ####### For debug #######
@@ -322,38 +356,7 @@ echo "var_homedir: $var_homedir"
 echo "var_installdir: $var_installdir"
 echo "var_stage: $var_stage"
 
-if [[ ! -f "$var_stage" ]]; then
-	echo "ШАГ ПОДГОТОВКА начало..."
-	echo "Создание каталога установки..."
-	[[ -d "$var_installdir" ]] || (mkdir "$var_installdir" && echo "Каталог установки успешно создан")
 
-	grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f4 | tee "$var_os"
-
-	if [[ "$(cat "$var_os")" = "server" ]]; then
-		echo "Отключение всех существующих репозиториев"
-		apt-repo rm all
-		echo "Предварительная настройка локального репозитория..."
-		var_branch=$(grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f5 | cut -d'.' -f1)
-		var_repo="mirorr-au"
-		cat >"/etc/apt/sources.list.d/local.list" <<-EOF
-			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64 classic
-			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64-i586 classic
-			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/noarch classic
-		EOF
-		echo "Установка компонентов, необходимых для работы скрипта..."
-		echo "Обновление индексов пакетов..."
-		apt-get update -q
-		apt-get install -yq sudo
-		apt-get install -yq dialog
-		# apt-get install task-auth-ad-sssd
-	fi
-	echo "Загрузка скрипта для локального запуска..."
-	[[ ! -f "$var_stage" ]] && curl -# -o "$var_homedir/$var_scriptname" "http://mirror.ttg.gazprom.ru/distribs/$var_scriptname" || echo "Ошибка загрузки файла $var_scriptname"
-	chown "$(logname):" "$var_homedir/$var_scriptname"
-	chmod +x "$var_homedir/$var_scriptname"
-	echo "ШАГ ПОДГОТОВКА завершен..." && echo "0" >"$var_stage" && echo "Статус установки сохранен..."
-	exec "$var_homedir/$var_scriptname"
-fi
 
 if [ ! -f "/var/log/gty/.install/complete.log" ]; then
 	var_message="Вы пытаетесь запустить скрипт повторно, после успешного завершения."

@@ -425,6 +425,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && escape
 		clear
 	fi
+
 	####### For debug #######
 	echo "${var_filial}"
 
@@ -540,12 +541,9 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	fi
 	message "--warning" "Перед продолжением работы УБЕДИТЕСЬ, что в организационной единице $var_msgou вашего филиала СОЗДАНА учетная запись компьютера с именем  $var_hostname"
 	clear
-	#zenity --modal --warning --width 300 --height=100 --ok-label="Учетная запись компьютера $var_hostname создана" --text="Перед продолжением работы убедитесь, что в организационной единице WorstationsLnx вашего филиала создана учетная запись компьютера с именем  $var_hostname"
-
 	cat >"$var_installdir/hostname" <<-EOF
 		${var_hostname,,}
 	EOF
-
 	requestcred
 
 	pause

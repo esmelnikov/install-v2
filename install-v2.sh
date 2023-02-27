@@ -238,16 +238,16 @@ if [[ ! -f "$var_stage" ]]; then
 	grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f4 | tee "$var_os"
 
 	if [[ "$(cat "$var_os")" = "server" ]]; then
-		echo "Отключение всех существующих репозиториев"
-		apt-repo rm all
-		echo "Предварительная настройка локального репозитория..."
-		var_branch=$(grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f5 | cut -d'.' -f1)
-		var_repo="mirorr-au"
-		cat >"/etc/apt/sources.list.d/local.list" <<-EOF
-			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64 classic
-			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64-i586 classic
-			rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/noarch classic
-		EOF
+		#echo "Отключение всех существующих репозиториев"
+		#apt-repo rm all
+		#echo "Предварительная настройка локального репозитория..."
+		#var_branch=$(grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f5 | cut -d'.' -f1)
+		#var_repo="mirorr-au"
+		#cat >"/etc/apt/sources.list.d/local.list" <<-EOF
+		#	rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64 classic
+		#	rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/x86_64-i586 classic
+		#	rpm [p${var_branch}] http://${var_repo}.ttg.gazprom.ru/pub/distributions/ALTLinux p${var_branch}/branch/noarch classic
+		#EOF
 		echo "Установка компонентов, необходимых для работы скрипта..."
 		echo "Обновление индексов пакетов..."
 		apt-get update -q

@@ -401,9 +401,13 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			var_exitcode=$?
 			set -e
 			trap 'error ${LINENO}' ERR
-			
-			[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Выполнение скрипта прервано пользователем..." && exit 0
-			[[ $var_filial = "" ]] && var_exitcode="200" && zenity --modal --warning --width 300 --height=100 --text="Необходимо выбрать филиал." && continue
+
+			[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && escape
+			if [[ $var_filial = "" ]]; then
+				var_exitcode="200"
+				message "--warning" "Необходимо выбрать филиал."
+				continue
+			fi
 		done
 	else
 		height=18
@@ -416,7 +420,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		var_exitcode=$?
 		set -e
 		trap 'error ${LINENO}' ERR
-		[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && clear && echo "Выполнение скрипта прервано пользователем..." && exit 0
+		[[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]] && escape
 		clear
 	fi
 	####### For debug #######
@@ -425,7 +429,6 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	pause
 
 	base64 -d "$var_installdir/setting.enc" >"$var_installdir/setting.orig"
-
 	var_filialcode=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f2)
 	var_domain=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f3)
 	var_usergrp=$(grep -e "^${var_filial}" "$var_installdir/setting.orig" | cut -d";" -f4)
@@ -472,7 +475,6 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		clear
 		exit 0
 	fi
-
 
 	var_cod=$(cat "$var_installdir/filialcode")
 	var_return="200"

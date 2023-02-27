@@ -226,8 +226,6 @@ echo "Шаг установки: $var_stage"
 
 
 
-
-
 ####### For debug #######
 var_filialready=0
 if [[ $var_filialready = 0 ]]; then
@@ -236,7 +234,9 @@ if [[ $var_filialready = 0 ]]; then
 fi
 
 
+
 pause
+
 
 var_os="$var_installdir/.os"
 echo workstation >"${var_os}"

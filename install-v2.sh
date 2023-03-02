@@ -548,6 +548,18 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 
 	pause
 
+	# For etcnet
+	cat >"/lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns" <<-EOF
+		[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
+	EOF
+
+	/sbin/update_chrooted conf
+	chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
+	chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
+
+	# Add part of script NM
+
+	# For Network manager exist
 	cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
 		#!/bin/bash
 		# from install.sh script

@@ -6,7 +6,7 @@
 
 # var_scriptrepo="http://mirror.ttg.gazprom.ru/distribs"
 var_scriptrepo="https://raw.githubusercontent.com/esmelnikov/install-v2/main"
-var_version="02.27.02.15"
+var_version="02.01.03.22"
 var_scriptname="install-v2.sh"
 set -o pipefail # trace ERR through pipes
 set -o errtrace # trace ERR through 'time command' and other functions

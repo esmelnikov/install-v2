@@ -190,7 +190,6 @@ function requestcred() {
 	done
 	trap 'error ${LINENO}' ERR
 	set -e
-	echo "End of function"
 	cat >"$var_installdir/credential" <<-EOF
 		$(printf "%s" "$var_credential" | base64)
 	EOF

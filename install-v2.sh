@@ -546,49 +546,63 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	EOF
 	requestcred
 
-	pause
-
-	# For etcnet
-	cat >"/lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns" <<-EOF
-		[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
-	EOF
-
-	/sbin/update_chrooted conf
-	chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
-	chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
-
-	# Add part of script NM
-
-	# For Network manager exist
-	cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
-		#!/bin/bash
-		# from install.sh script
-		# 15/02/2023
-		mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
-		var_resolvfiles+=(/etc/resolv.conf /run/NetworkManager/resolv.conf /run/NetworkManager/no-stub-resolv.conf)
-		for var_resolvfiles in "\${var_resolvfiles[@]}"; do
-			[[ ! -f "\$var_resolvfiles" ]] && continue
-			if grep "^search" "\$var_resolvfiles"; then
-				sed -i "s/^search.*/search $(cat "$var_installdir/domain") ttg.gazprom.ru/1" "\$var_resolvfiles"
-			else
-				echo "search $(cat "$var_installdir/domain") ttg.gazprom.ru" >>"\$var_resolvfiles"
-			fi
-			if grep "^options single-reques.*" "\$var_resolvfiles"; then
-				sed -i "s/^options single-reques.*/options single-request-reopen/1" "\$var_resolvfiles"
-			else
-				echo "options single-request-reopen" >>"\$var_resolvfiles"
-			fi
-		done
+	if systemctl is-active --quiet NetworkManager; then
+		# For Network manager
+		cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
+			#!/bin/bash
+			# from install-v2.sh script
+			# 15/02/2023
+			mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
+			var_resolvfiles+=(/etc/resolv.conf /run/NetworkManager/resolv.conf /run/NetworkManager/no-stub-resolv.conf)
+			for var_resolvfiles in "\${var_resolvfiles[@]}"; do
+				[[ ! -f "\$var_resolvfiles" ]] && continue
+				if grep "^search" "\$var_resolvfiles"; then
+					sed -i "s/^search.*/search $(cat "$var_installdir/domain") ttg.gazprom.ru/1" "\$var_resolvfiles"
+				else
+					echo "search $(cat "$var_installdir/domain") ttg.gazprom.ru" >>"\$var_resolvfiles"
+				fi
+				if grep "^options single-reques.*" "\$var_resolvfiles"; then
+					sed -i "s/^options single-reques.*/options single-request-reopen/1" "\$var_resolvfiles"
+				else
+					echo "options single-request-reopen" >>"\$var_resolvfiles"
+				fi
+			done
+			/sbin/update_chrooted conf
+			exit 0
+		EOF
+		chmod +x "/etc/NetworkManager/dispatcher.d/99-fix-slow-dns"
+		nmcli con reload
+		echo "Ожидание инициализации сети..."
+		nm-online -t 60
+		sleep 5
+	else
+		# For etcnet
+		cat >"/lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns" <<-EOF
+			# from install-v2.sh script
+			# 03/03/2023
+			[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
+			mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
+			for var_resolvfiles in "\${var_resolvfiles[@]}"; do
+				[[ ! -f "\$var_resolvfiles" ]] && continue
+				if grep "^search" "\$var_resolvfiles"; then
+					sed -i "s/^search.*/search $(cat "$var_installdir/domain") ttg.gazprom.ru/1" "\$var_resolvfiles"
+				else
+					echo "search $(cat "$var_installdir/domain") ttg.gazprom.ru" >>"\$var_resolvfiles"
+				fi
+				if grep "^options single-reques.*" "\$var_resolvfiles"; then
+					sed -i "s/^options single-reques.*/options single-request-reopen/1" "\$var_resolvfiles"
+				else
+					echo "options single-request-reopen" >>"\$var_resolvfiles"
+				fi
+			done
+			/sbin/update_chrooted conf
+		EOF
 		/sbin/update_chrooted conf
-		exit 0
-	EOF
+		chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
+		chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
+	fi
 
-	chmod +x "/etc/NetworkManager/dispatcher.d/99-fix-slow-dns"
-
-	nmcli con reload
-	echo "Ожидание инициализации сети..."
-	nm-online -t 60
-	sleep 5
+	pause
 
 	if [[ "$var_cod" != "NY" ]]; then var_repo="mirror"; fi
 	echo "Загрузка необходимых для установки компонентов..."

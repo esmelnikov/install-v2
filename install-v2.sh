@@ -391,7 +391,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	)
 
 	var_title="Выбор филиала"
-	var_text="Для корректной настройки АРМ необходимо выбрать филиал Общества"
+	var_text="Для корректной настройки необходимо выбрать филиал Общества"
 	if [[ "$DISPLAY" ]]; then
 		var_column1="Код"
 		var_column2="Филиал"
@@ -414,7 +414,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		height=18
 		width=73
 		choice_height=11
-		backtitle="Индивидуальные настройки АРМ филиала"
+		backtitle="Индивидуальные настройки филиала"
 		set +e
 		trap '' ERR
 		var_filial=$(dialog --clear --no-tags --cancel-label "Выход" --backtitle "$backtitle" --title "$var_title" --menu "$var_text" "$height" "$width" "$choice_height" "${var_menu[@]}" 2>&1 >/dev/tty)

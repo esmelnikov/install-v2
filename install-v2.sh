@@ -96,7 +96,6 @@ function cleanup() {
 	#		[[ -f "$var_stage" ]] && rm -f "$var_stage"
 	#		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
 	#	fi
-
 	echo 'RUN FUNCTION CLEANUP'
 }
 

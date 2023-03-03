@@ -554,9 +554,6 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	EOF
 	requestcred
 
-	var_version="02.03.03.22"
-	var_scriptname="install-v2.sh"
-
 	if systemctl is-active --quiet NetworkManager; then
 		# For Network manager
 		cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
@@ -635,43 +632,39 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 fi
 # ШАГ 0 КОНЕЦ
 
-echo "Test"
 pause
 
-echo workstation >"${var_os}"
-var_cod="AU"
+echo "Включение записи журнала установки..."
+var_logfile="$var_homedir/install-$(date +"%d-%m-%Y").log"
+[[ ! -f "$var_logfile" ]] && touch "$var_logfile"
+exec > >(tee -a "$var_logfile") 2>&1
+echo "Журнал установки сохраняется в файле: $var_logfile"
+chown "$(logname)" "$var_logfile"
+
+# ШАГ 1 НАЧАЛО
+if [[ "$(cat "$var_stage")" = 1 ]]; then
+	echo "ШАГ $(cat "$var_stage") начало..."
+	echo "Версия скрипта: $var_version"
+	echo "$(logname) ALL=(ALL) NOPASSWD:/home/$(logname)/$var_scriptname" >"/etc/sudoers.d/77-autostart" && echo "Настройка полномочий для запуска скрипта выполнена успешно"
+	echo -en "[SeatDefaults]\ngreeter-session=lightdm-gtk-greeter\nautologin-user=$(logname)" >"/usr/share/lightdm/lightdm.conf.d/77-lightdm-gtk-greeter.conf" && echo "Настройка автологона системного пользователя выполнена успешно"
+	echo -en "[Desktop Entry]\nType=Application\nExec=mate-terminal -e '/home/$(logname)/$var_scriptname'\nHidden=false\nX-MATE-Autostart-enabled=true\nName[ru_RU]=77-autostart.desktop\nName=77-autostart\nComment[ru_RU]=\nComment=\nX-MATE-Autostart-Delay=5" >"/home/$(logname)/.config/autostart/77-autostart.desktop" && echo "Настройка автозапуска скрипта выполнена успешно"
+	# rm -f /etc/xdg/autostart/apt-indicator.desktop
+	echo "Извлечение архивов..."
+	tar -xf "$var_installdir/linux-amd64.tgz" -C "$var_installdir"
+	unzip -qo "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" -d "$var_installdir/jacarta213" && echo "Архив jacartauc_2.13.12.3203_alt_x64.zip успешно распакован"
+	unzip -qo "$var_installdir/ius.zip" -d "$var_installdir" && echo "Архив ius.zip успешно распакован"
+	unzip -qo "$var_installdir/ca.zip" -d "$var_installdir" && echo "Архив ca.zip успешно распакован"
+	echo "ШАГ $(cat "$var_stage") завершен..." && echo "2" >"$var_stage" && echo "Статус установки сохранен..."
+fi
+# ШАГ 1 КОНЕЦ
+
 
 sleep 1d
 
-var_scriptdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-var_homedir="/home/$(logname)"
-var_installdir="/home/$(logname)/.install"
-var_stage="$var_installdir/.stage"
-var_os="$var_installdir/.os"
 
-echo "Скрипт расположен в каталоге: $var_scriptdir"
-echo "Скрипт запущен пользователем: $(logname)"
-echo "Скрипт выполняется с правами пользователя: $(whoami)"
-echo "Переменная окружения \$HOME: $HOME"
 
-echo "Значения переменных..."
-echo "var_scriptdir: $var_scriptdir"
-echo "var_homedir: $var_homedir"
-echo "var_installdir: $var_installdir"
-echo "var_stage: $var_stage"
-
-if [ ! -f "/var/log/gty/.install/complete.log" ]; then
-	var_message="Вы пытаетесь запустить скрипт повторно, после успешного завершения."
-	message "--warning" "$var_message"
-fi
-
-echo "Скрипт расположен в каталоге: $var_scriptdir"
-echo "Скрипт запущен пользователем: $(logname)"
-echo "Скрипт выполняется с правами пользователя: $(whoami)"
-echo "Переменная окружения \$HOME: $HOME"
-
-echo "Значения переменных..."
-echo "var_scriptdir: $var_scriptdir"
-echo "var_homedir: $var_homedir"
-echo "var_installdir: $var_installdir"
-echo "var_stage: $var_stage"
+	for var_crt in "$var_installdir"/ca/gp-root/*.cer; do
+		[ -e "$var_crt" ] || continue
+		/opt/cprocsp/bin/amd64/certmgr -inst -store mRoot -file "$var_crt"
+		echo "ROOT: $var_crt"
+	done

@@ -258,7 +258,7 @@ if [[ ! -f "$var_stage" ]]; then
 		# apt-get install task-auth-ad-sssd
 	fi
 	echo "Загрузка скрипта для локального запуска..."
-	[[ ! -f "$var_stage" ]] && curl -# -o "$var_homedir/$var_scriptname" "$var_scriptrepo/$var_scriptname" || echo "Ошибка загрузки файла $var_scriptname"
+	curl -# -o "$var_homedir/$var_scriptname" "$var_scriptrepo/$var_scriptname" || echo "Ошибка загрузки файла $var_scriptname"
 	chown "$(logname):" "$var_homedir/$var_scriptname"
 	chmod +x "$var_homedir/$var_scriptname"
 	echo "ШАГ ПОДГОТОВКА завершен..." && echo "0" >"$var_stage" && echo "Статус установки сохранен..."

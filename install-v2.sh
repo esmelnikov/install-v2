@@ -251,11 +251,9 @@ if [[ ! -f "$var_stage" ]]; then
 		#EOF
 		echo "Установка компонентов, необходимых для работы скрипта..."
 		echo "Обновление индексов пакетов..."
-		
 		apt-get update -q
 		apt-get install -yq sudo
 		apt-get install -yq dialog
-		# apt-get install task-auth-ad-sssd
 	fi
 	echo "Загрузка скрипта для локального запуска..."
 	curl -# -o "$var_homedir/$var_scriptname" "$var_scriptrepo/$var_scriptname" || echo "Ошибка загрузки файла $var_scriptname"

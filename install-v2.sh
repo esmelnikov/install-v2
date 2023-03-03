@@ -92,7 +92,6 @@ function setpasswordgrub() {
 
 function cleanup() {
 	[[ ! -f "$var_stage" ]] && exit 0
-
 	if [[ "$(cat "$var_stage")" = 0 ]]; then
 		[[ -f "$var_stage" ]] && rm -f "$var_stage"
 		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
@@ -248,6 +247,7 @@ if [[ ! -f "$var_stage" ]]; then
 		#EOF
 		echo "Установка компонентов, необходимых для работы скрипта..."
 		echo "Обновление индексов пакетов..."
+		pause
 		apt-get update -q
 		apt-get install -yq sudo
 		apt-get install -yq dialog

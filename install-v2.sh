@@ -529,7 +529,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		fi
 	done
 	clear
-
+	####### For debug #######
 	echo "${var_exitcode}"
 	echo "${var_hostname}"
 	####### Enter hostname #######
@@ -629,9 +629,6 @@ pause
 echo workstation >"${var_os}"
 var_cod="AU"
 
-sleep 1d
-
-echo "Все предварительные условия соблюдены"
 sleep 1d
 
 var_scriptdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

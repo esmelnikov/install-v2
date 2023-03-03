@@ -8,6 +8,7 @@
 var_scriptrepo="https://raw.githubusercontent.com/esmelnikov/install-v2/main"
 var_version="02.03.03.22"
 var_scriptname="install-v2.sh"
+#var_debug=true
 set -o pipefail # trace ERR through pipes
 set -o errtrace # trace ERR through 'time command' and other functions
 #set -o nounset # set -u : exit the script if you try to use an uninitialised variable
@@ -272,7 +273,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	#echo "Переменная окружения \$HOME: $HOME"
 
 	if [[ "$(cat "$var_os")" = "workstation" ]]; then
-		# Пакеты для установки из репозитория на ОС Alt Workstation
+		# Пакеты для установки из репозитория для Alt Workstation
 		cat >"$var_installdir/installreppkgs" <<-EOF
 			pcsc-lite-ccid
 			pcsc-tools-gui
@@ -304,12 +305,15 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			doublecmd
 			gtk-theme-windows-10
 		EOF
-		# Дополнительные сторонние пакеты rpm для установки
+		# Дополнительные сторонние пакеты для Alt Workstation r7-office.rpm
 		cat >"$var_installdir/installextpkgs" <<-EOF
 			ICAClient-rhel-13.10.0.20-0.x86_64.rpm
 			ctxusb-2.7.20-1.x86_64.rpm
-			r7-office.rpm
 			ifd-rutokens_1.0.4_1.x86_64.rpm
+			ca.zip
+			ius.zip
+			jacartauc_3.0.0.3319_alt_x64.zip
+			linux-amd64.tgz
 		EOF
 		# Пакеты для удаления apt-indicator
 		cat >"$var_installdir/delpkgs" <<-EOF
@@ -321,12 +325,16 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			pcsc-lite-openct
 		EOF
 	else
-		# Пакеты для установки на Alt Server
+		# # Пакеты для установки из репозитория для Alt Server
 		cat >"$var_installdir/installreppkgs" <<-EOF
 			task-auth-ad-sssd
 			libsasl2-3
 			postfix-tls
 			postfix-cyrus
+		EOF
+		# Дополнительные сторонние пакеты для Alt Server
+		cat >"$var_installdir/installextpkgs" <<-EOF
+			ca.zip
 		EOF
 	fi
 
@@ -546,16 +554,15 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	EOF
 	requestcred
 
-
-var_version="02.03.03.22"
-var_scriptname="install-v2.sh"
+	var_version="02.03.03.22"
+	var_scriptname="install-v2.sh"
 
 	if systemctl is-active --quiet NetworkManager; then
 		# For Network manager
 		cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
 			#!/bin/bash
 			# Script name: $var_scriptname
-			# Script version: $var_version			
+			# Script version: $var_version   
 			# Date of creation: $(date +%d.%m.%Y' '%T)
 			mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
 			var_resolvfiles+=(/etc/resolv.conf /run/NetworkManager/resolv.conf /run/NetworkManager/no-stub-resolv.conf)
@@ -584,7 +591,7 @@ var_scriptname="install-v2.sh"
 		# For etcnet
 		cat >"/lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns" <<-EOF
 			# Script name: $var_scriptname
-			# Script version: $var_version			
+			# Script version: $var_version   
 			# Date of creation: $(date +%d.%m.%Y' '%T)
 			[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
 			mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
@@ -609,22 +616,21 @@ var_scriptname="install-v2.sh"
 		chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
 	fi
 
-	pause
-
-	if [[ "$var_cod" != "NY" ]]; then var_repo="mirror"; fi
-	echo "Загрузка необходимых для установки компонентов..."
-	curl -#C - -o "$var_installdir/linux-amd64.tgz" "http://${var_repo}.ttg.gazprom.ru/distribs/criptopro50r3/linux-amd64.tgz" || echo "Ошибка загрузки файла linux-amd64.tgz"
-	curl -#C - -o "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/jacarta213/jacartauc_2.13.12.3203_alt_x64.zip" || echo "Ошибка загрузки файла jacartauc_2.13.12.3203_alt_x64.zip"
-	curl -#C - -o "$var_installdir/ius.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ius.zip" || echo "Ошибка загрузки файла ius.zip"
-	curl -#C - -o "$var_installdir/ca.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ca.zip" || echo "Ошибка загрузки файла ca.zip"
-	echo "Загрузка компонентов успешно завершена..."
-	echo "Загрузка дополнительных сторонних пакетов rpm..."
+	if [[ "$var_cod" = "NY" ]]; then var_scriptrepo="http://mirror-ny.ttg.gazprom.ru/distribs"; fi
+	#echo "Загрузка необходимых для установки компонентов..."
+	#curl -#C - -o "$var_installdir/linux-amd64.tgz" "http://${var_repo}.ttg.gazprom.ru/distribs/criptopro50r3/linux-amd64.tgz" || echo "Ошибка загрузки файла linux-amd64.tgz"
+	#curl -#C - -o "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/jacarta213/jacartauc_2.13.12.3203_alt_x64.zip" || echo "Ошибка загрузки файла jacartauc_2.13.12.3203_alt_x64.zip"
+	#curl -#C - -o "$var_installdir/ius.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ius.zip" || echo "Ошибка загрузки файла ius.zip"
+	#curl -#C - -o "$var_installdir/ca.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ca.zip" || echo "Ошибка загрузки файла ca.zip"
+	#echo "Загрузка компонентов успешно завершена..."
+	echo "Загрузка дополнительных сторонних пакетов..."
 	var_installextpkgs=$(tr '\n' ' ' <"$var_installdir/installextpkgs")
 	for i in $var_installextpkgs; do
 		echo "Загрузка пакета $i..."
-		curl -#C - -o "$var_installdir/$i" "http://${var_repo}.ttg.gazprom.ru/distribs/rpm/$i" || echo "Ошибка загрузки файла $i"
+		curl -#C - -o "$var_installdir/$i" "$var_scriptrepo/rpm/$i" || echo "Ошибка загрузки файла $i"
 		echo "Пакет $i успешно загружен..."
 	done
+	echo "Загрузка компонентов успешно завершена..."
 	echo "ШАГ 0 завершен..." && echo "1" >"$var_stage" && echo "Статус установки сохранен..."
 fi
 # ШАГ 0 КОНЕЦ
@@ -669,5 +675,3 @@ echo "var_scriptdir: $var_scriptdir"
 echo "var_homedir: $var_homedir"
 echo "var_installdir: $var_installdir"
 echo "var_stage: $var_stage"
-
-

@@ -91,12 +91,12 @@ function setpasswordgrub() {
 }
 
 function cleanup() {
-	#	[[ ! -f "$var_stage" ]] && exit 0
-	#	if [[ "$(cat "$var_stage")" = 0 ]]; then
-	#		[[ -f "$var_stage" ]] && rm -f "$var_stage"
-	#		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
-	#	fi
-	echo 'RUN FUNCTION CLEANUP'
+	[[ ! -f "$var_stage" ]] && exit 0
+	if [[ "$(cat "$var_stage")" = 0 ]]; then
+		[[ -d "${var_installdir}" ]] && rm -rf "$var_installdir"
+		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
+	fi
+	echo 'Function cleanup complete'
 }
 
 function error() {

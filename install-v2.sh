@@ -251,7 +251,7 @@ if [[ ! -f "$var_stage" ]]; then
 		#EOF
 		echo "Установка компонентов, необходимых для работы скрипта..."
 		echo "Обновление индексов пакетов..."
-		pause
+		
 		apt-get update -q
 		apt-get install -yq sudo
 		apt-get install -yq dialog

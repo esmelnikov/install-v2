@@ -551,7 +551,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		cat >"/etc/NetworkManager/dispatcher.d/99-fix-slow-dns" <<-EOF
 			#!/bin/bash
 			# from install-v2.sh script
-			# 15/02/2023
+			# $(date +%d.%m.%Y' '%T)"
 			mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
 			var_resolvfiles+=(/etc/resolv.conf /run/NetworkManager/resolv.conf /run/NetworkManager/no-stub-resolv.conf)
 			for var_resolvfiles in "\${var_resolvfiles[@]}"; do
@@ -579,7 +579,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		# For etcnet
 		cat >"/lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns" <<-EOF
 			# from install-v2.sh script
-			# 03/03/2023
+			# $(date +%d.%m.%Y' '%T)"
 			[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
 			mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
 			for var_resolvfiles in "\${var_resolvfiles[@]}"; do
@@ -664,14 +664,4 @@ echo "var_homedir: $var_homedir"
 echo "var_installdir: $var_installdir"
 echo "var_stage: $var_stage"
 
-####### Choise filial #######
-
-echo '222222'
-echo '222222'
-echo '222222'
-echo '222222'
-echo '222222'
-echo '222222'
-#[[ $? = 77 ]] && echo 'Вы завершили работу скрипта...' && exit 0
-
-#echo "Exit function code" $?
+exit 0

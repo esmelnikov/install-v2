@@ -141,7 +141,7 @@ function message {
 			dialog --clear --title "$var_title" --msgbox "$2" 10 42
 			var_exitcode=$?
 		else
-			echo "$var_message"
+			echo "$2"
 		fi
 	fi
 	if [[ "$var_exitcode" = 255 ]] || [[ "$var_exitcode" = 1 ]]; then
@@ -210,14 +210,14 @@ var_os="$var_installdir/.os"
 
 if [[ ! "$(command -v shutdown)" ]]; then
 	clear
-	message "--warning" "Скрипт запущен некорректно. В дистрибутивах ALT для получения прав root следует \
+	message "--error" "Скрипт запущен некорректно. В дистрибутивах ALT для получения прав root следует \
 	использовать команду su- (su с \"минусом\"). Выполните команду su- в терминале, а затем запустите скрипт."
 	exit 0
 fi
 
 if [ -f "/var/log/gty/.install/complete.log" ]; then
 	clear
-	message "--warning" "Вы пытаетесь запустить скрипт повторно, после успешного завершения."
+	message "--error" "Вы пытаетесь запустить скрипт повторно, после успешного завершения."
 	exit 0
 fi
 

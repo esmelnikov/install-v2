@@ -97,7 +97,7 @@ function cleanup() {
 	#		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
 	#	fi
 
-	echo 'CLEANUP'
+	echo 'RUN FUNCTION CLEANUP'
 }
 
 function error() {

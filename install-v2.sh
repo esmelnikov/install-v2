@@ -92,8 +92,9 @@ function setpasswordgrub() {
 
 function cleanup() {
 	[[ ! -f "$var_stage" ]] && exit 0
+
 	if [[ "$(cat "$var_stage")" = 0 ]]; then
-		[[ -d "${var_installdir}" ]] && rm -rf "$var_installdir"
+		[[ -f "$var_stage" ]] && rm -f "$var_stage"
 		[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
 	fi
 	echo 'Function cleanup complete'
@@ -468,6 +469,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 
 	####### For debug #######
 	var_filialready=1
+
 	if [[ $var_filialready = 0 ]]; then
 		message "--warning" "Для настройки компьютера Alt Linux вашего филиала необходимо предоставить дополнительные данные. Информацию можно получить обратившись по адресу: es.melnikov@ttg.gazprom.ru"
 		clear
@@ -593,6 +595,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			done
 			/sbin/update_chrooted conf
 		EOF
+		resolvconf -u
 		/sbin/update_chrooted conf
 		chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
 		chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns

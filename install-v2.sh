@@ -2,7 +2,7 @@
 # 1. Добавлена возможность работы скрипта через SSH
 # 2. Добавлена возможность работы скрипта при ручной (без использования DHCP) настройке сетевого интерфейса
 # 3.
-# 7 Команда для запуска: bash <(curl -#LJ https://raw.githubusercontent.com/esmelnikov/install-v2/main/install-v2.sh)
+# 7 Команда для запуска: bash <(curl -s#LJ https://raw.githubusercontent.com/esmelnikov/install-v2/main/install-v2.sh)
 
 # var_scriptrepo="http://mirror.ttg.gazprom.ru/distribs"
 var_scriptrepo="https://raw.githubusercontent.com/esmelnikov/install-v2/main"

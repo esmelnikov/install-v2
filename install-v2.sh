@@ -234,9 +234,7 @@ if [[ ! -f "$var_stage" ]]; then
 	echo "ШАГ ПОДГОТОВКА начало..."
 	echo "Создание каталога установки..."
 	[[ -d "$var_installdir" ]] || (mkdir "$var_installdir" && echo "Каталог установки успешно создан")
-
 	grep 'CPE_NAME=' '/etc/os-release' | cut -d':' -f4 | tee "$var_os"
-
 	if [[ "$(cat "$var_os")" = "server" ]]; then
 		#echo "Отключение всех существующих репозиториев"
 		#apt-repo rm all

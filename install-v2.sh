@@ -209,14 +209,15 @@ var_stage="$var_installdir/.stage"
 var_os="$var_installdir/.os"
 
 if [[ ! "$(command -v shutdown)" ]]; then
+	clear
 	message "--warning" "Скрипт запущен некорректно. В дистрибутивах ALT для получения прав root следует \
 	использовать команду su- (su с \"минусом\"). Выполните команду su- в терминале, а затем запустите скрипт."
 	exit 0
 fi
 
 if [ -f "/var/log/gty/.install/complete.log" ]; then
-	message "--warning" "Вы пытаетесь запустить скрипт повторно, после успешного завершения."
 	clear
+	message "--warning" "Вы пытаетесь запустить скрипт повторно, после успешного завершения."
 	exit 0
 fi
 

@@ -6,7 +6,7 @@
 
 # var_scriptrepo="http://mirror.ttg.gazprom.ru/distribs"
 var_scriptrepo="https://raw.githubusercontent.com/esmelnikov/install-v2/main"
-var_version="02.03.03.22"
+var_version="02.04.03.22"
 var_scriptname="install-v2.sh"
 #var_debug=true
 set -o pipefail # trace ERR through pipes
@@ -99,6 +99,7 @@ function cleanup() {
 	#	[[ -f "$var_stage" ]] && rm -f "$var_stage"
 	#	[[ -f "$var_homedir/$var_scriptname" ]] && rm -f "$var_homedir/$var_scriptname"
 	#fi
+	clear
 	echo 'Function cleanup complete'
 }
 

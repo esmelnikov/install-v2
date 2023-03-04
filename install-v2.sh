@@ -578,7 +578,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		EOF
 		chmod +x "/etc/NetworkManager/dispatcher.d/99-fix-slow-dns"
 		nmcli con reload
-		echo "Ожидание инициализации сети..."
+		echo "Ожидание инициализации сети."
 		nm-online -t 60
 		sleep 5
 	else
@@ -611,29 +611,23 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	fi
 
 	if [[ "$var_cod" = "NY" ]]; then var_scriptrepo="http://mirror-ny.ttg.gazprom.ru/distribs"; fi
-	#echo "Загрузка необходимых для установки компонентов..."
-	#curl -#C - -o "$var_installdir/linux-amd64.tgz" "http://${var_repo}.ttg.gazprom.ru/distribs/criptopro50r3/linux-amd64.tgz" || echo "Ошибка загрузки файла linux-amd64.tgz"
-	#curl -#C - -o "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/jacarta213/jacartauc_2.13.12.3203_alt_x64.zip" || echo "Ошибка загрузки файла jacartauc_2.13.12.3203_alt_x64.zip"
-	#curl -#C - -o "$var_installdir/ius.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ius.zip" || echo "Ошибка загрузки файла ius.zip"
-	#curl -#C - -o "$var_installdir/ca.zip" "http://${var_repo}.ttg.gazprom.ru/distribs/ca.zip" || echo "Ошибка загрузки файла ca.zip"
-	#echo "Загрузка компонентов успешно завершена..."
-	echo "Загрузка дополнительных сторонних пакетов..."
+	echo "Загрузка дополнительных сторонних пакетов."
 	var_installextpkgs=$(tr '\n' ' ' <"$var_installdir/installextpkgs")
 	for i in $var_installextpkgs; do
-		echo "Загрузка пакета $i..."
+		echo "Загрузка пакета $i"
 		curl -#C - -o "$var_installdir/$i" "$var_scriptrepo/rpm/$i" || echo "Ошибка загрузки файла $i"
-		echo "Пакет $i успешно загружен..."
-		[ "${i: -4}" == ".tgz" ] && tar -xf "$var_installdir/$i" -C "$var_installdir"
-		[ "${i: -4}" == ".zip" ] && unzip -qo "$var_installdir/$i" -d "$var_installdir"
+		echo "Пакет $i успешно загружен."
+		[ "${i: -4}" == ".tgz" ] && tar -xf "$var_installdir/$i" -C "$var_installdir" || echo "Ошибка распаковки файла $i"
+		[ "${i: -4}" == ".zip" ] && unzip -qo "$var_installdir/$i" -d "$var_installdir" || echo "Ошибка распаковки файла $i"
 	done
-	echo "Загрузка пакетов успешно завершена..."
-	echo "ШАГ 0 завершен..." && echo "1" >"$var_stage" && echo "Статус установки сохранен..."
+	echo "Загрузка пакетов успешно завершена."
+	echo "ШАГ 0 завершен." && echo "1" >"$var_stage" && echo "Статус установки сохранен."
 fi
 # ШАГ 0 КОНЕЦ
 
 pause
 
-echo "Включение записи журнала установки..."
+echo "Включение записи журнала установки."
 var_logfile="$var_homedir/install-$(date +"%d-%m-%Y").log"
 [[ ! -f "$var_logfile" ]] && touch "$var_logfile"
 exec > >(tee -a "$var_logfile") 2>&1
@@ -642,7 +636,7 @@ chown "$(logname)" "$var_logfile"
 
 # ШАГ 1 НАЧАЛО
 if [[ "$(cat "$var_stage")" = 1 ]]; then
-	echo "ШАГ $(cat "$var_stage") начало..."
+	echo "ШАГ $(cat "$var_stage") начало."
 	echo "Версия скрипта: $var_version"
 	echo "$(logname) ALL=(ALL) NOPASSWD:/home/$(logname)/$var_scriptname" >"/etc/sudoers.d/77-autostart" && echo "Настройка полномочий для запуска скрипта выполнена успешно"
 	echo -en "[SeatDefaults]\ngreeter-session=lightdm-gtk-greeter\nautologin-user=$(logname)" >"/usr/share/lightdm/lightdm.conf.d/77-lightdm-gtk-greeter.conf" && echo "Настройка автологона системного пользователя выполнена успешно"

@@ -590,6 +590,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		EOF
 		chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
 		chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
+		dhcpcd -N
 		mapfile -t var_resolvfiles <<<"\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
 		for var_resolvfiles in "${var_resolvfiles[@]}"; do
 			[[ ! -f "$var_resolvfiles" ]] && continue

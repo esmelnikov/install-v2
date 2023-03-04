@@ -618,8 +618,8 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		echo "Загрузка пакета $i"
 		curl -#C - -o "$var_installdir/$i" "$var_scriptrepo/rpm/$i" || echo "Ошибка загрузки файла $i"
 		echo "Пакет $i успешно загружен."
-		[ "${i: -4}" == ".tgz" ] && tar -xf "$var_installdir/$i" -C "$var_installdir" || echo "Ошибка распаковки файла $i"
-		[ "${i: -4}" == ".zip" ] && unzip -qo "$var_installdir/$i" -d "$var_installdir" || echo "Ошибка распаковки файла $i"
+		[ "${i: -4}" == ".tgz" ] && tar -xf "$var_installdir/$i" -C "$var_installdir" && echo "Файл $i успешно распакован."
+		[ "${i: -4}" == ".zip" ] && unzip -qo "$var_installdir/$i" -d "$var_installdir" && echo "Файл $i успешно распакован."
 	done
 	echo "Загрузка пакетов успешно завершена."
 	echo "ШАГ 0 завершен." && echo "1" >"$var_stage" && echo "Статус установки сохранен."

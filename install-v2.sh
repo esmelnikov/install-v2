@@ -638,10 +638,11 @@ if [[ "$(cat "$var_stage")" = 1 ]]; then
 	echo "$(logname) ALL=(ALL) NOPASSWD:/home/$(logname)/$var_scriptname" >"/etc/sudoers.d/77-autostart" &&
 		echo "Настройка полномочий для запуска скрипта выполнена успешно"
 	if [[ "$DISPLAY" ]]; then
-		echo -en "[SeatDefaults]\ngreeter-session=lightdm-gtk-greeter\nautologin-user=$(logname)" >"/usr/share/lightdm/lightdm.conf.d/77-lightdm-gtk-greeter.conf" &&
-			echo "Настройка автологона системного пользователя выполнена успешно"
-		echo -en "[Desktop Entry]\nType=Application\nExec=mate-terminal -e '/home/$(logname)/$var_scriptname'\nHidden=false\nX-MATE-Autostart-enabled=true\nName[ru_RU]\=77-autostart.desktop\nName=77-autostart\nComment[ru_RU]=\nComment=\nX-MATE-Autostart-Delay=5" \
-			>"/home/$(logname)/.config/autostart/77-autostart.desktop" && echo "Настройка автозапуска скрипта выполнена успешно"
+		echo -en "[SeatDefaults]\ngreeter-session=lightdm-gtk-greeter\nautologin-user=$(logname)" >"/usr/share/lightdm/lightdm.conf.d/77-lightdm-gtk-greeter.conf"
+		echo "Настройка автологона системного пользователя выполнена успешно"
+		echo -en "[Desktop Entry]\nType=Application\nExec=mate-terminal -e '/home/$(logname)/$var_scriptname'\nHidden=false\nX-MATE-Autostart-enabled=true\nName[ru_RU]\
+		=77-autostart.desktop\nName=77-autostart\nComment[ru_RU]=\nComment=\nX-MATE-Autostart-Delay=5" >"/home/$(logname)/.config/autostart/77-autostart.desktop"
+		echo "Настройка автозапуска скрипта выполнена успешно"
 	else
 		echo "/home/$(logname)/$var_scriptname" >>"/home/$(logname)/.bashrc"
 	fi

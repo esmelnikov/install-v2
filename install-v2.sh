@@ -624,8 +624,6 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 fi
 # ШАГ 0 КОНЕЦ
 
-pause
-
 echo "Включение записи журнала установки."
 var_logfile="$var_homedir/install-$(date +"%d-%m-%Y").log"
 [[ ! -f "$var_logfile" ]] && touch "$var_logfile"
@@ -637,23 +635,26 @@ chown "$(logname)" "$var_logfile"
 if [[ "$(cat "$var_stage")" = 1 ]]; then
 	echo "ШАГ $(cat "$var_stage") начало."
 	echo "Версия скрипта: $var_version"
-	echo "$(logname) ALL=(ALL) NOPASSWD:/home/$(logname)/$var_scriptname" >"/etc/sudoers.d/77-autostart" && echo "Настройка полномочий для запуска скрипта выполнена успешно"
-	echo -en "[SeatDefaults]\ngreeter-session=lightdm-gtk-greeter\nautologin-user=$(logname)" >"/usr/share/lightdm/lightdm.conf.d/77-lightdm-gtk-greeter.conf" && echo "Настройка автологона системного пользователя выполнена успешно"
-	echo -en "[Desktop Entry]\nType=Application\nExec=mate-terminal -e '/home/$(logname)/$var_scriptname'\nHidden=false\nX-MATE-Autostart-enabled=true\nName[ru_RU]=77-autostart.desktop\nName=77-autostart\nComment[ru_RU]=\nComment=\nX-MATE-Autostart-Delay=5" >"/home/$(logname)/.config/autostart/77-autostart.desktop" && echo "Настройка автозапуска скрипта выполнена успешно"
+	echo "$(logname) ALL=(ALL) NOPASSWD:/home/$(logname)/$var_scriptname" >"/etc/sudoers.d/77-autostart" &&
+		echo "Настройка полномочий для запуска скрипта выполнена успешно"
+	if [[ "$DISPLAY" ]]; then
+		echo -en "[SeatDefaults]\ngreeter-session=lightdm-gtk-greeter\nautologin-user=$(logname)" >"/usr/share/lightdm/lightdm.conf.d/77-lightdm-gtk-greeter.conf" &&
+			echo "Настройка автологона системного пользователя выполнена успешно"
+		echo -en "[Desktop Entry]\nType=Application\nExec=mate-terminal -e '/home/$(logname)/$var_scriptname'\nHidden=false\nX-MATE-Autostart-enabled=true\nName[ru_RU]\=77-autostart.desktop\nName=77-autostart\nComment[ru_RU]=\nComment=\nX-MATE-Autostart-Delay=5" >"/home/$(logname)/.config/autostart/77-autostart.desktop" &&
+			echo "Настройка автозапуска скрипта выполнена успешно"
+	else
+		echo "/home/$(logname)/$var_scriptname" >>"/home/$(logname)/.bashrc"
+	fi
+
+	echo "Autostart complete"
+	sleep 1d
+
 	# rm -f /etc/xdg/autostart/apt-indicator.desktop
-	echo "Извлечение архивов..."
-	tar -xf "$var_installdir/linux-amd64.tgz" -C "$var_installdir"
-	unzip -qo "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" -d "$var_installdir/jacarta213" && echo "Архив jacartauc_2.13.12.3203_alt_x64.zip успешно распакован"
-	unzip -qo "$var_installdir/ius.zip" -d "$var_installdir" && echo "Архив ius.zip успешно распакован"
-	unzip -qo "$var_installdir/ca.zip" -d "$var_installdir" && echo "Архив ca.zip успешно распакован"
+	#echo "Извлечение архивов..."
+	#tar -xf "$var_installdir/linux-amd64.tgz" -C "$var_installdir"
+	#unzip -qo "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" -d "$var_installdir/jacarta213" && echo "Архив jacartauc_2.13.12.3203_alt_x64.zip успешно распакован"
+	#unzip -qo "$var_installdir/ius.zip" -d "$var_installdir" && echo "Архив ius.zip успешно распакован"
+	#unzip -qo "$var_installdir/ca.zip" -d "$var_installdir" && echo "Архив ca.zip успешно распакован"
 	echo "ШАГ $(cat "$var_stage") завершен..." && echo "2" >"$var_stage" && echo "Статус установки сохранен..."
 fi
 # ШАГ 1 КОНЕЦ
-
-sleep 1d
-
-for var_crt in "$var_installdir"/ca/gp-root/*.cer; do
-	[ -e "$var_crt" ] || continue
-	/opt/cprocsp/bin/amd64/certmgr -inst -store mRoot -file "$var_crt"
-	echo "ROOT: $var_crt"
-done

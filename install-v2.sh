@@ -20,8 +20,6 @@ if test "$(id -u)" -ne 0; then
 	exit $?
 fi
 
-####### Function definition #######
-
 function pause() {
 	read -rsp $'Press any key to continue...\n' -n 1
 }
@@ -199,8 +197,6 @@ function requestcred() {
 		$(printf "%s" "$var_credential" | base64)
 	EOF
 }
-
-####### End of function definition #######
 
 trap 'error ${LINENO}' ERR
 trap 'cleanup' EXIT
@@ -591,26 +587,26 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			# Script version: $var_version   
 			# Date of creation: $(date +%d.%m.%Y' '%T)
 			[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
-			mapfile -t var_resolvfiles <<< "\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
-			for var_resolvfiles in "\${var_resolvfiles[@]}"; do
-				[[ ! -f "\$var_resolvfiles" ]] && continue
-				if grep "^search" "\$var_resolvfiles"; then
-					sed -i "s/^search.*/search $(cat "$var_installdir/domain") ttg.gazprom.ru/1" "\$var_resolvfiles"
-				else
-					echo "search $(cat "$var_installdir/domain") ttg.gazprom.ru" >>"\$var_resolvfiles"
-				fi
-				if grep "^options single-reques.*" "\$var_resolvfiles"; then
-					sed -i "s/^options single-reques.*/options single-request-reopen/1" "\$var_resolvfiles"
-				else
-					echo "options single-request-reopen" >>"\$var_resolvfiles"
-				fi
-			done
 			/sbin/update_chrooted conf
 		EOF
-		resolvconf -u
-		/sbin/update_chrooted conf
 		chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
 		chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
+		mapfile -t var_resolvfiles <<<"\$(find '/etc/net/ifaces/' -name 'resolv.conf')"
+		for var_resolvfiles in "${var_resolvfiles[@]}"; do
+			[[ ! -f "$var_resolvfiles" ]] && continue
+			if grep "^search" "$var_resolvfiles"; then
+				sed -i "s/^search.*/search $(cat "$var_installdir/domain") ttg.gazprom.ru/1" "$var_resolvfiles"
+			else
+				echo "search $(cat "$var_installdir/domain") ttg.gazprom.ru" >>"$var_resolvfiles"
+			fi
+			if grep "^options single-reques.*" "$var_resolvfiles"; then
+				sed -i "s/^options single-reques.*/options single-request-reopen/1" "$var_resolvfiles"
+			else
+				echo "options single-request-reopen" >>"$var_resolvfiles"
+			fi
+		done
+		/sbin/update_chrooted conf
+		resolvconf -u
 	fi
 
 	if [[ "$var_cod" = "NY" ]]; then var_scriptrepo="http://mirror-ny.ttg.gazprom.ru/distribs"; fi
@@ -626,6 +622,9 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		echo "Загрузка пакета $i..."
 		curl -#C - -o "$var_installdir/$i" "$var_scriptrepo/rpm/$i" || echo "Ошибка загрузки файла $i"
 		echo "Пакет $i успешно загружен..."
+
+		[ "${i: -4}" == ".tgz" ] && tar -xf "$var_installdir/$i" -C "$var_installdir"
+		[ "${i: -4}" == ".zip" ] && unzip -qo "$var_installdir/$i" -d "$var_installdir"
 	done
 	echo "Загрузка компонентов успешно завершена..."
 	echo "ШАГ 0 завершен..." && echo "1" >"$var_stage" && echo "Статус установки сохранен..."
@@ -658,13 +657,10 @@ if [[ "$(cat "$var_stage")" = 1 ]]; then
 fi
 # ШАГ 1 КОНЕЦ
 
-
 sleep 1d
 
-
-
-	for var_crt in "$var_installdir"/ca/gp-root/*.cer; do
-		[ -e "$var_crt" ] || continue
-		/opt/cprocsp/bin/amd64/certmgr -inst -store mRoot -file "$var_crt"
-		echo "ROOT: $var_crt"
-	done
+for var_crt in "$var_installdir"/ca/gp-root/*.cer; do
+	[ -e "$var_crt" ] || continue
+	/opt/cprocsp/bin/amd64/certmgr -inst -store mRoot -file "$var_crt"
+	echo "ROOT: $var_crt"
+done

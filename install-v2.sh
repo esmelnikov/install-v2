@@ -589,6 +589,7 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			# Date of creation: $(date +%d.%m.%Y' '%T)
 			[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
 			/sbin/update_chrooted conf
+			resolvconf -u
 		EOF
 		chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
 		chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns

@@ -340,7 +340,6 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 	echo "Извлечение архива..."
 	unzip -qo "$var_installdir/setting.zip" -d "$var_installdir" && echo "Архив setting.zip успешно распакован"
 
-	####### Choise filial #######
 	var_menu=(
 		AU "Администрация Общества"
 		BU "Белоярское отделение УОВОФ"
@@ -483,8 +482,6 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 		exit 0
 	fi
 
-	####### Enter hostname #######
-
 	var_cod=$(cat "$var_installdir/filialcode")
 	var_title="Имя компьютера"
 	var_text="Введите имя компьютера"
@@ -588,8 +585,8 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 			# Script version: $var_version   
 			# Date of creation: $(date +%d.%m.%Y' '%T)
 			[ "\$if_up" = "true" ] && echo 'options single-request-reopen' | /sbin/resolvconf -a "\${interface}.options" > /dev/null 2>&1
-			/sbin/update_chrooted conf
 			resolvconf -u
+			/sbin/update_chrooted conf
 		EOF
 		chmod +x /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
 		chmod 444 /lib/dhcpcd/dhcpcd-hooks/99-fix-slow-dns
@@ -607,8 +604,8 @@ if [[ "$(cat "$var_stage")" = 0 ]]; then
 				echo "options single-request-reopen" >>"$var_resolvfiles"
 			fi
 		done
-		/sbin/update_chrooted conf
 		resolvconf -u
+		/sbin/update_chrooted conf
 	fi
 
 	if [[ "$var_cod" = "NY" ]]; then var_scriptrepo="http://mirror-ny.ttg.gazprom.ru/distribs"; fi

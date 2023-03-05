@@ -650,16 +650,43 @@ if [[ "$(cat "$var_stage")" = 1 ]]; then
 		[[ -n "\$SSH_CONNECTION" ]] && "/home/$(logname)/$var_scriptname"
 		EOF
 	fi
-
-	echo "Autostart complete"
-	sleep 1d
-
-	# rm -f /etc/xdg/autostart/apt-indicator.desktop
-	#echo "Извлечение архивов..."
-	#tar -xf "$var_installdir/linux-amd64.tgz" -C "$var_installdir"
-	#unzip -qo "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" -d "$var_installdir/jacarta213" && echo "Архив jacartauc_2.13.12.3203_alt_x64.zip успешно распакован"
-	#unzip -qo "$var_installdir/ius.zip" -d "$var_installdir" && echo "Архив ius.zip успешно распакован"
-	#unzip -qo "$var_installdir/ca.zip" -d "$var_installdir" && echo "Архив ca.zip успешно распакован"
 	echo "ШАГ $(cat "$var_stage") завершен." && echo "2" >"$var_stage" && echo "Статус установки сохранен."
 fi
 # ШАГ 1 КОНЕЦ
+
+# ШАГ 2 НАЧАЛО
+if [[ "$(cat "$var_stage")" = 2 ]]; then
+	echo "ШАГ $(cat "$var_stage") начало."
+	echo "Настройка локального репозитория."
+	echo "Отключение всех существующих репозиториев"
+	apt-repo rm all
+	echo "Копирование /etc/apt/sources.list.d/local.list"
+	cat "$var_installdir/local.list" >"/etc/apt/sources.list.d/local.list"
+	echo "Обновление индексов пакетов."
+	apt-get update -q
+	echo "Удаление компонентов не соотвествующих требованиям ИБ."
+	var_delpkgs=$(tr '\n' ' ' <"$var_installdir/delpkgs")
+	for i in $var_delpkgs; do
+		echo "Удаление пакета: $i"
+		rpm -q "$i" >/dev/null && apt-get remove -yqq "$i" && echo "Пакет $i успешно удален."
+	done
+	echo "Установка обновлений системы."
+	apt-get dist-upgrade -y || (
+		echo "Ошибка установки обновлений"
+		exit 77
+	) && echo "Обновление системы успешно завершено"
+	echo "Обновление ядра..."
+	update-kernel -y || (
+		echo "Ошибка обновления ядра"
+		exit 77
+	) && echo "Обновление ядра успешно завершено"
+	echo "Очистка кэша пакетов."
+	apt-get clean -y && echo "Успешно"
+	echo "Изменение имени компьютера."
+	hostnamectl set-hostname "$(cat "$var_installdir/hostname").$(cat "$var_installdir/domain")"
+	echo "ШАГ $(cat "$var_stage") завершен." && echo "3" >"$var_stage" && echo "Статус установки сохранен."
+	echo "Для продолжения настройки компьютера требуется его перезагрузка."
+	countdown 7
+	shutdown -r 0
+fi
+# ШАГ 2 КОНЕЦ

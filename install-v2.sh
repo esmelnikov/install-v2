@@ -660,6 +660,6 @@ if [[ "$(cat "$var_stage")" = 1 ]]; then
 	#unzip -qo "$var_installdir/jacartauc_2.13.12.3203_alt_x64.zip" -d "$var_installdir/jacarta213" && echo "Архив jacartauc_2.13.12.3203_alt_x64.zip успешно распакован"
 	#unzip -qo "$var_installdir/ius.zip" -d "$var_installdir" && echo "Архив ius.zip успешно распакован"
 	#unzip -qo "$var_installdir/ca.zip" -d "$var_installdir" && echo "Архив ca.zip успешно распакован"
-	echo "ШАГ $(cat "$var_stage") завершен..." && echo "2" >"$var_stage" && echo "Статус установки сохранен..."
+	echo "ШАГ $(cat "$var_stage") завершен..." && echo "2" >"$var_stage" && echo "Статус установки сохранен."
 fi
 # ШАГ 1 КОНЕЦ

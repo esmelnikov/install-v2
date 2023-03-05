@@ -644,8 +644,11 @@ if [[ "$(cat "$var_stage")" = 1 ]]; then
 		=77-autostart.desktop\nName=77-autostart\nComment[ru_RU]=\nComment=\nX-MATE-Autostart-Delay=5" >"/home/$(logname)/.config/autostart/77-autostart.desktop"
 		echo "Настройка автозапуска скрипта выполнена успешно"
 	else
-		#echo "/home/$(logname)/$var_scriptname" >>"/home/$(logname)/.bashrc"
-		echo "/home/$(logname)/$var_scriptname" >>"/home/$(logname)/.bash_profile"
+		#"/home/$(logname)/.bashrc"
+		cat >>"/home/$(logname)/.bash_profile" <<-EOF
+		[[ -z "\$PS1" ]] && return
+		[[ -n "\$SSH_CONNECTION" ]] && "/home/$(logname)/$var_scriptname"
+		EOF
 	fi
 
 	echo "Autostart complete"

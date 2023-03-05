@@ -635,8 +635,8 @@ chown "$(logname)" "$var_logfile"
 if [[ "$(cat "$var_stage")" = 1 ]]; then
 	echo "ШАГ $(cat "$var_stage") начало."
 	echo "Версия скрипта: $var_version"
-	echo "$(logname) ALL=(ALL) NOPASSWD:/home/$(logname)/$var_scriptname" >"/etc/sudoers.d/77-autostart" &&
-		echo "Настройка полномочий для запуска скрипта выполнена успешно"
+	echo "$(logname) ALL=(ALL) NOPASSWD:/home/$(logname)/$var_scriptname" >"/etc/sudoers.d/77-autostart"
+	echo "Настройка полномочий для запуска скрипта выполнена успешно"
 	if [[ "$DISPLAY" ]]; then
 		echo -en "[SeatDefaults]\ngreeter-session=lightdm-gtk-greeter\nautologin-user=$(logname)" >"/usr/share/lightdm/lightdm.conf.d/77-lightdm-gtk-greeter.conf"
 		echo "Настройка автологона системного пользователя выполнена успешно"

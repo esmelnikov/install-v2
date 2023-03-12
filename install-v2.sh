@@ -6,7 +6,7 @@
 
 # var_scriptrepo="http://mirror.ttg.gazprom.ru/distribs"
 var_scriptrepo="https://raw.githubusercontent.com/esmelnikov/install-v2/main"
-var_version="02.04.03.22"
+var_version="02.12.03.22"
 var_scriptname="install-v2.sh"
 #var_debug=true
 set -o pipefail # trace ERR through pipes
@@ -648,11 +648,14 @@ if [[ "$(cat "$var_stage")" = 1 ]]; then
 		cat >>"/home/$(logname)/.bash_profile" <<-EOF
 		[[ -z "\$PS1" ]] && return
 		[[ -n "\$SSH_CONNECTION" ]] && "/home/$(logname)/$var_scriptname"
+		if [[ \$TERM == 'linux' ]]; then "/home/$(logname)/$var_scriptname"; fi
 		EOF
 	fi
 	echo "ШАГ $(cat "$var_stage") завершен." && echo "2" >"$var_stage" && echo "Статус установки сохранен."
 fi
 # ШАГ 1 КОНЕЦ
+
+sleep 1d
 
 # ШАГ 2 НАЧАЛО
 if [[ "$(cat "$var_stage")" = 2 ]]; then
